@@ -205,13 +205,3 @@ impl Cal {
         cal_data
     }
 }
-
-pub enum CalStage {
-    Gyro,
-    AccTop,
-    AccBottom,
-    AccLeft,
-    AccRight,
-    AccFront,
-    AccBack,
-}

@@ -65,24 +65,40 @@ impl eframe::App for MyApp {
             }
         }
 
+        while let Ok(msg) = self.mag_rx.try_recv() {
+            if self.collect_mag {
+                self.cal.add_mag_measurement(msg.field);
+            }
+        }
+
         let modal_cal_data = Modal::new(ctx, "cal_data");
         // What goes inside the modal
         modal_cal_data.show(|ui| {
             let cal_data = self.cal_data.as_ref().unwrap();
+            let info = format!(
+                "Gyro offset: [{:+e}, {:+e}, {:+e}]\nAcc offset: [{:+e}, {:+e}, {:+e}]\nAcc scale: [{:+e}, {:+e}, {:+e}]",
+                cal_data.gyro_offset.x,
+                cal_data.gyro_offset.y,
+                cal_data.gyro_offset.z,
+                cal_data.acc_offset.x,
+                cal_data.acc_offset.y,
+                cal_data.acc_offset.z,
+                cal_data.acc_scale.x,
+                cal_data.acc_scale.y,
+                cal_data.acc_scale.z
+            );
+
             modal_cal_data.title(ui, "Calibration Data");
             modal_cal_data.frame(ui, |ui| {
-                let info =
-                    format!(
-                    "Gyro offset: [{}, {}, {}]\nAcc offset: [{}, {}, {}]\nAcc scale: [{}, {}, {}]",
-                    cal_data.gyro_offset.x, cal_data.gyro_offset.y, cal_data.gyro_offset.z,
-                    cal_data.acc_offset.x, cal_data.acc_offset.y, cal_data.acc_offset.z,
-                    cal_data.acc_scale.x, cal_data.acc_scale.y, cal_data.acc_scale.z
-                );
-                modal_cal_data.body(ui, info);
+                modal_cal_data.body(ui, info.clone());
             });
             modal_cal_data.buttons(ui, |ui| {
-                // After clicking, the modal is automatically closed
-                if modal_cal_data.button(ui, "close").clicked() {};
+                if modal_cal_data.caution_button(ui, "Close").clicked() {
+                    // After clicking, the modal is automatically closed
+                };
+                if ui.button("Copy To Clipboard").clicked() {
+                    ui.output_mut(|p| p.copied_text = info);
+                };
             });
         });
 
@@ -276,6 +292,88 @@ impl eframe::App for MyApp {
                                 )
                                 .name("YZ (cal)"),
                             );
+                        });
+                });
+            }
+
+            // gyro plot
+            if self.collect_mag {
+                egui::Window::new("Mag").show(ctx, |ui| {
+                    egui_plot::Plot::new("mag_plot")
+                        .allow_zoom(true)
+                        .allow_drag(true)
+                        .allow_scroll(false)
+                        .allow_boxed_zoom(false)
+                        .data_aspect(1.0)
+                        .view_aspect(1.0)
+                        .x_axis_label("T")
+                        .y_axis_label("T")
+                        .legend(Legend::default())
+                        .show(ui, |plot_ui| {
+                            plot_ui.points(
+                                egui_plot::Points::new(
+                                    self.cal
+                                        .mag_measurements()
+                                        .iter()
+                                        .map(|p| [p.x, p.y])
+                                        .collect::<Vec<_>>(),
+                                )
+                                .name("XY"),
+                            );
+
+                            plot_ui.points(
+                                egui_plot::Points::new(
+                                    self.cal
+                                        .mag_measurements()
+                                        .iter()
+                                        .map(|p| [p.x, p.z])
+                                        .collect::<Vec<_>>(),
+                                )
+                                .name("XZ"),
+                            );
+
+                            plot_ui.points(
+                                egui_plot::Points::new(
+                                    self.cal
+                                        .mag_measurements()
+                                        .iter()
+                                        .map(|p| [p.y, p.z])
+                                        .collect::<Vec<_>>(),
+                                )
+                                .name("YZ"),
+                            );
+
+                            // let gyro_measurements_with_cal = self.cal.gyro_measurements_with_cal();
+
+                            // plot_ui.points(
+                            //     egui_plot::Points::new(
+                            //         gyro_measurements_with_cal
+                            //             .iter()
+                            //             .map(|p| [p.x, p.y])
+                            //             .collect::<Vec<_>>(),
+                            //     )
+                            //     .name("XY (cal)"),
+                            // );
+
+                            // plot_ui.points(
+                            //     egui_plot::Points::new(
+                            //         gyro_measurements_with_cal
+                            //             .iter()
+                            //             .map(|p| [p.x, p.z])
+                            //             .collect::<Vec<_>>(),
+                            //     )
+                            //     .name("XZ (cal)"),
+                            // );
+
+                            // plot_ui.points(
+                            //     egui_plot::Points::new(
+                            //         gyro_measurements_with_cal
+                            //             .iter()
+                            //             .map(|p| [p.y, p.z])
+                            //             .collect::<Vec<_>>(),
+                            //     )
+                            //     .name("YZ (cal)"),
+                            // );
                         });
                 });
             }
