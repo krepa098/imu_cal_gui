@@ -93,10 +93,10 @@ impl eframe::App for MyApp {
                 modal_cal_data.body(ui, info.clone());
             });
             modal_cal_data.buttons(ui, |ui| {
-                if modal_cal_data.caution_button(ui, "Close").clicked() {
+                if modal_cal_data.caution_button(ui, "close").clicked() {
                     // After clicking, the modal is automatically closed
                 };
-                if ui.button("Copy To Clipboard").clicked() {
+                if ui.button("🗐 copy to clipboard").clicked() {
                     ui.output_mut(|p| p.copied_text = info);
                 };
             });
@@ -104,15 +104,22 @@ impl eframe::App for MyApp {
 
         egui::SidePanel::left("left_panel").show(ctx, |ui| {
             ui.heading("Data Sources");
-            if ui.checkbox(&mut self.collect_gyro, "Gyro").changed() {
+            if ui.toggle_value(&mut self.collect_gyro, "Gyro").changed() {};
+            if ui.toggle_value(&mut self.collect_acc, "Accel").changed() {};
+            if ui.toggle_value(&mut self.collect_mag, "Mag").changed() {};
+            ui.separator();
+
+            ui.heading("Clear Data");
+            if ui.button("🗑 gyro").clicked() {
                 self.cal.clear_gyro_measurements();
-            };
-            if ui.checkbox(&mut self.collect_acc, "Accel").changed() {
+            }
+            if ui.button("🗑 accel").clicked() {
                 self.cal.clear_accel_measurements();
-            };
-            if ui.checkbox(&mut self.collect_mag, "Mag").changed() {
+            }
+            if ui.button("🗑 mag").clicked() {
                 self.cal.clear_mag_measurements();
-            };
+            }
+            ui.separator();
 
             ui.heading("Filter");
             if ui
@@ -123,6 +130,7 @@ impl eframe::App for MyApp {
                 self.cal.clear_mag_measurements();
                 self.cal.clear_gyro_measurements();
             };
+            ui.separator();
 
             ui.heading("Calibration");
             if ui.button("Calibrate now").clicked() {
