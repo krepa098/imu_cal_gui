@@ -1,11 +1,14 @@
 [package]
-name = "rcu_com"
+name = "imu_cal_gui"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 tokio = { version = "1.40.0", features = ["full"] }
 nalgebra = { version = "0.33.0", features = ["serde-serialize"] }
+nalgebra-lapack = { version = "0.25.0", default-features = false, features = [
+    "openblas",
+] }
 futures = "0.3.31"
 r2r = "0.9"
 eframe = "0.29.1"
@@ -15,8 +18,3 @@ egui-modal = "0.5.0"
 rfd = "0.15.0"
 serde_json = "1.0.128"
 serde = { version = "1.0.210", features = ["derive"] }
-
-[dependencies.nalgebra-lapack]
-version = "0.25.0"
-default-features = false
-features = ["openblas"]
