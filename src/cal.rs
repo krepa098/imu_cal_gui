@@ -136,7 +136,7 @@ impl Cal {
         if let Some(cal_data) = self.cal_data {
             self.acc_points
                 .iter()
-                .map(|p| (*p + cal_data.acc_offset).component_mul(&cal_data.acc_scale))
+                .map(|p| (*p - cal_data.acc_offset).component_mul(&cal_data.acc_scale))
                 .collect::<Vec<_>>()
         } else {
             vec![]
