@@ -19,7 +19,7 @@ pub struct MagData {
     pub field: nalgebra::Vector3<f64>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, serde::Serialize)]
 pub struct CalData {
     pub gyro_offset: nalgebra::Vector3<f64>,
     pub acc_offset: nalgebra::Vector3<f64>,

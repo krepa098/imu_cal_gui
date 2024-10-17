@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.40.0", features = ["full"] }
-nalgebra = "0.33.0"
+nalgebra = { version = "0.33.0", features = ["serde-serialize"] }
 futures = "0.3.31"
 r2r = "0.9"
 eframe = "0.29.1"

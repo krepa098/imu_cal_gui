@@ -81,41 +81,59 @@ impl eframe::App for MyApp {
         // What goes inside the modal
         modal_cal_data.show(|ui| {
             let cal_data = self.cal_data.as_ref().unwrap();
-            let info = format!(
-                "Gyro offset: [{:+e}, {:+e}, {:+e}] in rad/s\nAcc offset: [{:+e}, {:+e}, {:+e}] in m/s²\nAcc scale: [{:+e}, {:+e}, {:+e}] (ul)\nSoft-iron transfrom:\n[{:+e}, {:+e}, {:+e}]\n[{:+e}, {:+e}, {}]\n[{:+e}, {:+e}, {:+e}]\nHard-iron bias: [{:+e}, {:+e}, {:+e}]",
-                cal_data.gyro_offset.x,
-                cal_data.gyro_offset.y,
-                cal_data.gyro_offset.z,
-                cal_data.acc_offset.x,
-                cal_data.acc_offset.y,
-                cal_data.acc_offset.z,
-                cal_data.acc_scale.x,
-                cal_data.acc_scale.y,
-                cal_data.acc_scale.z,
-                cal_data.soft_iron_transf[(0,0)],
-                cal_data.soft_iron_transf[(0,1)],
-                cal_data.soft_iron_transf[(0,2)],
-                cal_data.soft_iron_transf[(1,0)],
-                cal_data.soft_iron_transf[(1,1)],
-                cal_data.soft_iron_transf[(1,2)],
-                cal_data.soft_iron_transf[(2,0)],
-                cal_data.soft_iron_transf[(2,1)],
-                cal_data.soft_iron_transf[(2,2)],
-                cal_data.hard_iron_bias[0],
-                cal_data.hard_iron_bias[1],
-                cal_data.hard_iron_bias[2],
-            );
+
+            let info = serde_json::to_string_pretty(cal_data).unwrap();
 
             modal_cal_data.title(ui, "Calibration Results");
             modal_cal_data.frame(ui, |ui| {
-                modal_cal_data.body(ui, info.clone());
-                ui.label("FOO");
+                modal_cal_data.body(ui, "");
+                ui.heading("gyro offset");
+                egui::Grid::new("grid_gyro_offset").show(ui, |ui| {
+                    ui.label(format!("{:+e}", cal_data.gyro_offset.x));
+                    ui.label(format!("{:+e}", cal_data.gyro_offset.y));
+                    ui.label(format!("{:+e}", cal_data.gyro_offset.z));
+                });
+                ui.separator();
+                ui.heading("accel offset");
+                egui::Grid::new("grid_acc_offset").show(ui, |ui| {
+                    ui.label(format!("{:+e}", cal_data.acc_offset.x));
+                    ui.label(format!("{:+e}", cal_data.acc_offset.y));
+                    ui.label(format!("{:+e}", cal_data.acc_offset.z));
+                });
+                ui.label("accel scale");
+                egui::Grid::new("grid_acc_scale").show(ui, |ui| {
+                    ui.label(format!("{:+e}", cal_data.acc_scale.x));
+                    ui.label(format!("{:+e}", cal_data.acc_scale.y));
+                    ui.label(format!("{:+e}", cal_data.acc_scale.z));
+                });
+                ui.separator();
+                ui.heading("mag soft iron transform");
+                egui::Grid::new("grid_soft_iron").show(ui, |ui| {
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 0)]));
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 1)]));
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 2)]));
+                    ui.end_row();
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 0)]));
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 1)]));
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 2)]));
+                    ui.end_row();
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 0)]));
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 1)]));
+                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 2)]));
+                });
+                ui.separator();
+                ui.heading("mag hard iron bias");
+                egui::Grid::new("grid_hard_iron").show(ui, |ui| {
+                    ui.label(format!("{:+e}", cal_data.hard_iron_bias.x));
+                    ui.label(format!("{:+e}", cal_data.hard_iron_bias.y));
+                    ui.label(format!("{:+e}", cal_data.hard_iron_bias.z));
+                });
             });
             modal_cal_data.buttons(ui, |ui| {
                 if modal_cal_data.caution_button(ui, "close").clicked() {
                     // After clicking, the modal is automatically closed
                 };
-                if ui.button("🗐 copy").clicked() {
+                if ui.button("🗐 copy as json").clicked() {
                     ui.output_mut(|p| p.copied_text = info);
                 };
             });
