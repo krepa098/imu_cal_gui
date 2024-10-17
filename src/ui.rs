@@ -238,7 +238,7 @@ impl eframe::App for MyApp {
             if self.show_gyro {
                 plot_window(ctx, "Gyro", "rad/s", self.cal.gyro_measurements());
 
-                if let Some(cal_data) = self.cal_data {
+                if self.cal_data.is_some() {
                     let measurements_with_cal = self.cal.gyro_measurements_with_cal();
                     plot_window(ctx, "Gyro (calibrated)", "rad/s", &measurements_with_cal);
                 }
@@ -248,7 +248,7 @@ impl eframe::App for MyApp {
             if self.show_acc {
                 plot_window(ctx, "Accel", "m/s²", self.cal.acc_measurements());
 
-                if let Some(cal_data) = self.cal_data {
+                if self.cal_data.is_some() {
                     let measurements_with_cal = self.cal.acc_measurements_with_cal();
                     plot_window(ctx, "Accel (calibrated)", "m/s²", &measurements_with_cal);
                 }
@@ -258,7 +258,7 @@ impl eframe::App for MyApp {
             if self.show_mag {
                 plot_window(ctx, "Mag", "µT", self.cal.mag_measurements());
 
-                if let Some(cal_data) = self.cal_data {
+                if self.cal_data.is_some() {
                     let measurements_with_cal = self.cal.mag_measurements_with_cal();
                     plot_window(ctx, "Mag (calibrated)", "µT", &measurements_with_cal);
                 }
