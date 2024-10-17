@@ -2,6 +2,7 @@ use std::sync::mpsc::Receiver;
 
 use crate::cal::*;
 use eframe::egui::{self};
+use eframe::egui::{Style, Visuals};
 use egui::menu;
 use egui_modal::Modal;
 use egui_plot::Legend;
@@ -15,7 +16,15 @@ pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Res
     eframe::run_native(
         "IMU Calibration GUI",
         options,
-        Box::new(|_cc| Ok(Box::new(MyApp::new(imu_rx, mag_rx)))),
+        Box::new(|cc| {
+            let style = Style {
+                visuals: Visuals::dark(),
+                ..Style::default()
+            };
+            cc.egui_ctx.set_style(style);
+
+            Ok(Box::new(MyApp::new(imu_rx, mag_rx)))
+        }),
     )
 }
 
