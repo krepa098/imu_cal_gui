@@ -91,52 +91,53 @@ impl eframe::App for MyApp {
                 egui::Grid::new("grid_gyro_offset")
                     .striped(true)
                     .show(ui, |ui| {
-                        ui.label(format!("{:+e}", cal_data.gyro_offset.x));
-                        ui.label(format!("{:+e}", cal_data.gyro_offset.y));
-                        ui.label(format!("{:+e}", cal_data.gyro_offset.z));
+                        ui.label(format!("{:.4e}", cal_data.gyro_offset.x));
+                        ui.label(format!("{:.4e}", cal_data.gyro_offset.y));
+                        ui.label(format!("{:.4e}", cal_data.gyro_offset.z));
                     });
                 ui.separator();
                 ui.heading("accel offset");
                 egui::Grid::new("grid_acc_offset")
                     .striped(true)
                     .show(ui, |ui| {
-                        ui.label(format!("{:+e}", cal_data.acc_offset.x));
-                        ui.label(format!("{:+e}", cal_data.acc_offset.y));
-                        ui.label(format!("{:+e}", cal_data.acc_offset.z));
+                        ui.label(format!("{:.4e}", cal_data.acc_offset.x));
+                        ui.label(format!("{:.4e}", cal_data.acc_offset.y));
+                        ui.label(format!("{:.4e}", cal_data.acc_offset.z));
                     });
-                ui.label("accel scale");
+                ui.separator();
+                ui.heading("accel scale");
                 egui::Grid::new("grid_acc_scale")
                     .striped(true)
                     .show(ui, |ui| {
-                        ui.label(format!("{:+e}", cal_data.acc_scale.x));
-                        ui.label(format!("{:+e}", cal_data.acc_scale.y));
-                        ui.label(format!("{:+e}", cal_data.acc_scale.z));
+                        ui.label(format!("{:.4e}", cal_data.acc_scale.x));
+                        ui.label(format!("{:.4e}", cal_data.acc_scale.y));
+                        ui.label(format!("{:.4e}", cal_data.acc_scale.z));
                     });
                 ui.separator();
                 ui.heading("mag soft iron transform");
                 egui::Grid::new("grid_soft_iron")
                     .striped(true)
                     .show(ui, |ui| {
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 0)]));
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 1)]));
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 2)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(0, 0)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(0, 1)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(0, 2)]));
                         ui.end_row();
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 0)]));
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 1)]));
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 2)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(1, 0)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(1, 1)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(1, 2)]));
                         ui.end_row();
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 0)]));
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 1)]));
-                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 2)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(2, 0)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(2, 1)]));
+                        ui.label(format!("{:.4e}", cal_data.soft_iron_transf[(2, 2)]));
                     });
                 ui.separator();
                 ui.heading("mag hard iron bias");
                 egui::Grid::new("grid_hard_iron")
                     .striped(true)
                     .show(ui, |ui| {
-                        ui.label(format!("{:+e}", cal_data.hard_iron_bias.x));
-                        ui.label(format!("{:+e}", cal_data.hard_iron_bias.y));
-                        ui.label(format!("{:+e}", cal_data.hard_iron_bias.z));
+                        ui.label(format!("{:.4e}", cal_data.hard_iron_bias.x));
+                        ui.label(format!("{:.4e}", cal_data.hard_iron_bias.y));
+                        ui.label(format!("{:.4e}", cal_data.hard_iron_bias.z));
                     });
             });
             modal_cal_data.buttons(ui, |ui| {
