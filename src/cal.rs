@@ -32,6 +32,10 @@ impl CalData {
     pub fn apply_mag_cal(&self, mag_point: &Vector3<f64>) -> Vector3<f64> {
         self.soft_iron_transf * (mag_point - self.hard_iron_bias)
     }
+
+    pub fn as_json_string(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
+    }
 }
 
 #[derive(Debug)]

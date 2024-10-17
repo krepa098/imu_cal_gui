@@ -91,7 +91,7 @@ impl eframe::App for MyApp {
         modal_cal_data.show(|ui| {
             let cal_data = self.cal_data.as_ref().unwrap();
 
-            let info = serde_json::to_string_pretty(cal_data).unwrap();
+            let info = cal_data.as_json_string();
 
             modal_cal_data.title(ui, "Calibration Results");
             modal_cal_data.frame(ui, |ui| {
@@ -222,6 +222,11 @@ impl eframe::App for MyApp {
             if ui.button("Calibrate now").clicked() {
                 self.cal_data = Some(self.cal.calibrate());
                 modal_cal_data.open();
+            }
+            if let Some(cal_data) = self.cal_data {
+                if ui.button("🗐 copy as json").clicked() {
+                    ui.output_mut(|w| w.copied_text = cal_data.as_json_string())
+                }
             }
             ui.separator();
 
