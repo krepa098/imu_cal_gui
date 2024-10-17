@@ -82,7 +82,7 @@ impl eframe::App for MyApp {
         modal_cal_data.show(|ui| {
             let cal_data = self.cal_data.as_ref().unwrap();
             let info = format!(
-                "Gyro offset: [{:+e}, {:+e}, {:+e}] in rad/s\nAcc offset: [{:+e}, {:+e}, {:+e}] in m/s²\nAcc scale: [{:+e}, {:+e}, {:+e}] (ul)",
+                "Gyro offset: [{:+e}, {:+e}, {:+e}] in rad/s\nAcc offset: [{:+e}, {:+e}, {:+e}] in m/s²\nAcc scale: [{:+e}, {:+e}, {:+e}] (ul)\nSoft-iron transfrom:\n[{:+e}, {:+e}, {:+e}]\n[{:+e}, {:+e}, {}]\n[{:+e}, {:+e}, {:+e}]\nHard-iron bias: [{:+e}, {:+e}, {:+e}]",
                 cal_data.gyro_offset.x,
                 cal_data.gyro_offset.y,
                 cal_data.gyro_offset.z,
@@ -91,18 +91,31 @@ impl eframe::App for MyApp {
                 cal_data.acc_offset.z,
                 cal_data.acc_scale.x,
                 cal_data.acc_scale.y,
-                cal_data.acc_scale.z
+                cal_data.acc_scale.z,
+                cal_data.soft_iron_transf[(0,0)],
+                cal_data.soft_iron_transf[(0,1)],
+                cal_data.soft_iron_transf[(0,2)],
+                cal_data.soft_iron_transf[(1,0)],
+                cal_data.soft_iron_transf[(1,1)],
+                cal_data.soft_iron_transf[(1,2)],
+                cal_data.soft_iron_transf[(2,0)],
+                cal_data.soft_iron_transf[(2,1)],
+                cal_data.soft_iron_transf[(2,2)],
+                cal_data.hard_iron_bias[0],
+                cal_data.hard_iron_bias[1],
+                cal_data.hard_iron_bias[2],
             );
 
             modal_cal_data.title(ui, "Calibration Results");
             modal_cal_data.frame(ui, |ui| {
                 modal_cal_data.body(ui, info.clone());
+                ui.label("FOO");
             });
             modal_cal_data.buttons(ui, |ui| {
                 if modal_cal_data.caution_button(ui, "close").clicked() {
                     // After clicking, the modal is automatically closed
                 };
-                if ui.button("🗐 copy to clipboard").clicked() {
+                if ui.button("🗐 copy").clicked() {
                     ui.output_mut(|p| p.copied_text = info);
                 };
             });
@@ -111,13 +124,13 @@ impl eframe::App for MyApp {
         egui::SidePanel::left("left_panel").show(ctx, |ui| {
             menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
-                    // TODO: this does not close the menu
                     if ui.button("🗁 Open").clicked() {
                         if let Some(path) = rfd::FileDialog::new()
                             .add_filter("data", &["json"])
                             .pick_file()
                         {
                             self.cal.load_from_file(path);
+                            ui.close_menu();
                         }
                     }
                     if ui.button("🖴 Save").clicked() {
@@ -127,6 +140,7 @@ impl eframe::App for MyApp {
                         {
                             path.set_extension("json");
                             self.cal.save_to_file(path);
+                            ui.close_menu();
                         }
                     }
                 });
