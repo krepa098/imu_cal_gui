@@ -60,27 +60,9 @@ impl Cal {
 
     pub fn save_to_file(&self, path: PathBuf) {
         let mut data = std::collections::HashMap::new();
-        data.insert(
-            "acc",
-            self.acc_points
-                .iter()
-                .map(|p| [p.x, p.y, p.z])
-                .collect::<Vec<_>>(),
-        );
-        data.insert(
-            "gyro",
-            self.gyro_points
-                .iter()
-                .map(|p| [p.x, p.y, p.z])
-                .collect::<Vec<_>>(),
-        );
-        data.insert(
-            "mag",
-            self.mag_points
-                .iter()
-                .map(|p| [p.x, p.y, p.z])
-                .collect::<Vec<_>>(),
-        );
+        data.insert("acc", self.acc_points.clone());
+        data.insert("gyro", self.gyro_points.clone());
+        data.insert("mag", self.mag_points.clone());
 
         let json_string = serde_json::to_string(&data).unwrap();
 
@@ -93,27 +75,12 @@ impl Cal {
         let mut json_string = String::new();
         file.read_to_string(&mut json_string).unwrap();
 
-        let data: std::collections::HashMap<&str, Vec<[f64; 3]>> =
+        let data: std::collections::HashMap<&str, Vec<Vector3<f64>>> =
             serde_json::de::from_str(&json_string).unwrap();
 
-        let acc: Vec<_> = data["acc"]
-            .iter()
-            .map(|p| Vector3::new(p[0], p[1], p[2]))
-            .collect();
-
-        let gyro: Vec<_> = data["gyro"]
-            .iter()
-            .map(|p| Vector3::new(p[0], p[1], p[2]))
-            .collect();
-
-        let mag: Vec<_> = data["mag"]
-            .iter()
-            .map(|p| Vector3::new(p[0], p[1], p[2]))
-            .collect();
-
-        self.acc_points.extend_from_slice(&acc);
-        self.gyro_points.extend_from_slice(&gyro);
-        self.mag_points.extend_from_slice(&mag);
+        self.acc_points.extend_from_slice(&data["acc"]);
+        self.gyro_points.extend_from_slice(&data["gyro"]);
+        self.mag_points.extend_from_slice(&data["mag"]);
     }
 
     pub fn add_acc_measurement_still(&mut self, data: nalgebra::Vector3<f64>) {
