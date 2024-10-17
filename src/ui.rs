@@ -2,6 +2,7 @@ use std::sync::mpsc::Receiver;
 
 use crate::cal::*;
 use eframe::egui::{self, Color32};
+use egui::{menu, Button};
 use egui_modal::Modal;
 use egui_plot::Legend;
 use r2r::sensor_msgs;
@@ -109,6 +110,30 @@ impl eframe::App for MyApp {
         });
 
         egui::SidePanel::left("left_panel").show(ctx, |ui| {
+            menu::bar(ui, |ui| {
+                ui.menu_button("File", |ui| {
+                    // TODO: this does not close the menu
+                    if ui.button("🗁 Open").clicked() {
+                        if let Some(path) = rfd::FileDialog::new()
+                            .add_filter("data", &["json"])
+                            .pick_file()
+                        {
+                            self.cal.load_from_file(path);
+                        }
+                    }
+                    if ui.button("🖴 Save").clicked() {
+                        if let Some(mut path) = rfd::FileDialog::new()
+                            .add_filter("data", &["json"])
+                            .save_file()
+                        {
+                            path.set_extension("json");
+                            self.cal.save_to_file(path);
+                        }
+                    }
+                });
+            });
+            ui.separator();
+
             ui.heading("Data Sources");
             if ui.toggle_value(&mut self.collect_gyro, "Gyro").changed() {};
             if ui.toggle_value(&mut self.collect_acc, "Accel").changed() {};
@@ -329,7 +354,7 @@ impl eframe::App for MyApp {
                 });
             }
 
-            // gyro plot
+            // mag plot
             if self.show_mag {
                 egui::Window::new("Mag").show(ctx, |ui| {
                     egui_plot::Plot::new("mag_plot")
@@ -376,37 +401,37 @@ impl eframe::App for MyApp {
                                 .name("YZ"),
                             );
 
-                            // let gyro_measurements_with_cal = self.cal.gyro_measurements_with_cal();
+                            let mag_measurements_with_cal = self.cal.mag_measurements_with_cal();
 
-                            // plot_ui.points(
-                            //     egui_plot::Points::new(
-                            //         gyro_measurements_with_cal
-                            //             .iter()
-                            //             .map(|p| [p.x, p.y])
-                            //             .collect::<Vec<_>>(),
-                            //     )
-                            //     .name("XY (cal)"),
-                            // );
+                            plot_ui.points(
+                                egui_plot::Points::new(
+                                    mag_measurements_with_cal
+                                        .iter()
+                                        .map(|p| [p.x, p.y])
+                                        .collect::<Vec<_>>(),
+                                )
+                                .name("XY (cal)"),
+                            );
 
-                            // plot_ui.points(
-                            //     egui_plot::Points::new(
-                            //         gyro_measurements_with_cal
-                            //             .iter()
-                            //             .map(|p| [p.x, p.z])
-                            //             .collect::<Vec<_>>(),
-                            //     )
-                            //     .name("XZ (cal)"),
-                            // );
+                            plot_ui.points(
+                                egui_plot::Points::new(
+                                    mag_measurements_with_cal
+                                        .iter()
+                                        .map(|p| [p.x, p.z])
+                                        .collect::<Vec<_>>(),
+                                )
+                                .name("XZ (cal)"),
+                            );
 
-                            // plot_ui.points(
-                            //     egui_plot::Points::new(
-                            //         gyro_measurements_with_cal
-                            //             .iter()
-                            //             .map(|p| [p.y, p.z])
-                            //             .collect::<Vec<_>>(),
-                            //     )
-                            //     .name("YZ (cal)"),
-                            // );
+                            plot_ui.points(
+                                egui_plot::Points::new(
+                                    mag_measurements_with_cal
+                                        .iter()
+                                        .map(|p| [p.y, p.z])
+                                        .collect::<Vec<_>>(),
+                                )
+                                .name("YZ (cal)"),
+                            );
                         });
                 });
             }
