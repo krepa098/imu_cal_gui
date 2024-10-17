@@ -88,46 +88,56 @@ impl eframe::App for MyApp {
             modal_cal_data.frame(ui, |ui| {
                 modal_cal_data.body(ui, "");
                 ui.heading("gyro offset");
-                egui::Grid::new("grid_gyro_offset").show(ui, |ui| {
-                    ui.label(format!("{:+e}", cal_data.gyro_offset.x));
-                    ui.label(format!("{:+e}", cal_data.gyro_offset.y));
-                    ui.label(format!("{:+e}", cal_data.gyro_offset.z));
-                });
+                egui::Grid::new("grid_gyro_offset")
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.label(format!("{:+e}", cal_data.gyro_offset.x));
+                        ui.label(format!("{:+e}", cal_data.gyro_offset.y));
+                        ui.label(format!("{:+e}", cal_data.gyro_offset.z));
+                    });
                 ui.separator();
                 ui.heading("accel offset");
-                egui::Grid::new("grid_acc_offset").show(ui, |ui| {
-                    ui.label(format!("{:+e}", cal_data.acc_offset.x));
-                    ui.label(format!("{:+e}", cal_data.acc_offset.y));
-                    ui.label(format!("{:+e}", cal_data.acc_offset.z));
-                });
+                egui::Grid::new("grid_acc_offset")
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.label(format!("{:+e}", cal_data.acc_offset.x));
+                        ui.label(format!("{:+e}", cal_data.acc_offset.y));
+                        ui.label(format!("{:+e}", cal_data.acc_offset.z));
+                    });
                 ui.label("accel scale");
-                egui::Grid::new("grid_acc_scale").show(ui, |ui| {
-                    ui.label(format!("{:+e}", cal_data.acc_scale.x));
-                    ui.label(format!("{:+e}", cal_data.acc_scale.y));
-                    ui.label(format!("{:+e}", cal_data.acc_scale.z));
-                });
+                egui::Grid::new("grid_acc_scale")
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.label(format!("{:+e}", cal_data.acc_scale.x));
+                        ui.label(format!("{:+e}", cal_data.acc_scale.y));
+                        ui.label(format!("{:+e}", cal_data.acc_scale.z));
+                    });
                 ui.separator();
                 ui.heading("mag soft iron transform");
-                egui::Grid::new("grid_soft_iron").show(ui, |ui| {
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 0)]));
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 1)]));
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 2)]));
-                    ui.end_row();
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 0)]));
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 1)]));
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 2)]));
-                    ui.end_row();
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 0)]));
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 1)]));
-                    ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 2)]));
-                });
+                egui::Grid::new("grid_soft_iron")
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 0)]));
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 1)]));
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(0, 2)]));
+                        ui.end_row();
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 0)]));
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 1)]));
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(1, 2)]));
+                        ui.end_row();
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 0)]));
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 1)]));
+                        ui.label(format!("{:+e}", cal_data.soft_iron_transf[(2, 2)]));
+                    });
                 ui.separator();
                 ui.heading("mag hard iron bias");
-                egui::Grid::new("grid_hard_iron").show(ui, |ui| {
-                    ui.label(format!("{:+e}", cal_data.hard_iron_bias.x));
-                    ui.label(format!("{:+e}", cal_data.hard_iron_bias.y));
-                    ui.label(format!("{:+e}", cal_data.hard_iron_bias.z));
-                });
+                egui::Grid::new("grid_hard_iron")
+                    .striped(true)
+                    .show(ui, |ui| {
+                        ui.label(format!("{:+e}", cal_data.hard_iron_bias.x));
+                        ui.label(format!("{:+e}", cal_data.hard_iron_bias.y));
+                        ui.label(format!("{:+e}", cal_data.hard_iron_bias.z));
+                    });
             });
             modal_cal_data.buttons(ui, |ui| {
                 if modal_cal_data.caution_button(ui, "close").clicked() {
@@ -166,9 +176,9 @@ impl eframe::App for MyApp {
             ui.separator();
 
             ui.heading("Data Sources");
-            if ui.toggle_value(&mut self.collect_gyro, "Gyro").changed() {};
-            if ui.toggle_value(&mut self.collect_acc, "Accel").changed() {};
-            if ui.toggle_value(&mut self.collect_mag, "Mag").changed() {};
+            ui.toggle_value(&mut self.collect_gyro, "Gyro");
+            ui.toggle_value(&mut self.collect_acc, "Accel");
+            ui.toggle_value(&mut self.collect_mag, "Mag");
             ui.separator();
 
             ui.heading("Clear Data");
@@ -195,14 +205,7 @@ impl eframe::App for MyApp {
             ui.separator();
 
             ui.heading("Filter");
-            if ui
-                .checkbox(&mut self.filter_standstill, "Standstill")
-                .changed()
-            {
-                self.cal.clear_accel_measurements();
-                self.cal.clear_mag_measurements();
-                self.cal.clear_gyro_measurements();
-            };
+            ui.checkbox(&mut self.filter_standstill, "Await standstill");
             ui.separator();
 
             ui.heading("Calibration");
@@ -223,251 +226,71 @@ impl eframe::App for MyApp {
         egui::CentralPanel::default().show(ctx, |_ui| {
             // gyro plot
             if self.show_gyro {
-                egui::Window::new("Gyro").show(ctx, |ui| {
-                    egui_plot::Plot::new("gyro_plot")
-                        .allow_zoom(true)
-                        .allow_drag(true)
-                        .allow_scroll(false)
-                        .allow_boxed_zoom(false)
-                        .data_aspect(1.0)
-                        .view_aspect(1.0)
-                        .x_axis_label("rad/s")
-                        .y_axis_label("rad/s")
-                        .legend(Legend::default())
-                        .show(ui, |plot_ui| {
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .gyro_measurements()
-                                        .iter()
-                                        .map(|p| [p.x, p.y])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XY"),
-                            );
+                plot_window(ctx, "Gyro", "rad/s", self.cal.gyro_measurements());
 
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .gyro_measurements()
-                                        .iter()
-                                        .map(|p| [p.x, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XZ"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .gyro_measurements()
-                                        .iter()
-                                        .map(|p| [p.y, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("YZ"),
-                            );
-
-                            let gyro_measurements_with_cal = self.cal.gyro_measurements_with_cal();
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    gyro_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.x, p.y])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XY (cal)"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    gyro_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.x, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XZ (cal)"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    gyro_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.y, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("YZ (cal)"),
-                            );
-                        });
-                });
+                if let Some(cal_data) = self.cal_data {
+                    let measurements_with_cal = self.cal.gyro_measurements_with_cal();
+                    plot_window(ctx, "Gyro (calibrated)", "rad/s", &measurements_with_cal);
+                }
             }
 
             // acc plot
             if self.show_acc {
-                egui::Window::new("Accelerometer").show(ctx, |ui| {
-                    egui_plot::Plot::new("acc_plot")
-                        .allow_zoom(true)
-                        .allow_drag(true)
-                        .allow_boxed_zoom(false)
-                        .allow_scroll(false)
-                        .data_aspect(1.0)
-                        .view_aspect(1.0)
-                        .x_axis_label("m/s²")
-                        .y_axis_label("m/s²")
-                        .legend(Legend::default())
-                        .show(ui, |plot_ui| {
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .acc_measurements()
-                                        .iter()
-                                        .map(|p| [p.x, p.y])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XY"),
-                            );
+                plot_window(ctx, "Accel", "m/s²", self.cal.acc_measurements());
 
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .acc_measurements()
-                                        .iter()
-                                        .map(|p| [p.x, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XZ"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .acc_measurements()
-                                        .iter()
-                                        .map(|p| [p.y, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("YZ"),
-                            );
-
-                            let acc_measurements_with_cal = self.cal.acc_measurements_with_cal();
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    acc_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.x, p.y])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XY (cal)"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    acc_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.x, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XZ (cal)"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    acc_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.y, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("YZ (cal)"),
-                            );
-                        });
-                });
+                if let Some(cal_data) = self.cal_data {
+                    let measurements_with_cal = self.cal.acc_measurements_with_cal();
+                    plot_window(ctx, "Accel (calibrated)", "m/s²", &measurements_with_cal);
+                }
             }
 
             // mag plot
             if self.show_mag {
-                egui::Window::new("Mag").show(ctx, |ui| {
-                    egui_plot::Plot::new("mag_plot")
-                        .allow_zoom(true)
-                        .allow_drag(true)
-                        .allow_scroll(false)
-                        .allow_boxed_zoom(false)
-                        .data_aspect(1.0)
-                        .view_aspect(1.0)
-                        .x_axis_label("µT")
-                        .y_axis_label("µT")
-                        .legend(Legend::default())
-                        .show(ui, |plot_ui| {
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .mag_measurements()
-                                        .iter()
-                                        .map(|p| [p.x, p.y])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XY"),
-                            );
+                plot_window(ctx, "Mag", "µT", self.cal.mag_measurements());
 
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .mag_measurements()
-                                        .iter()
-                                        .map(|p| [p.x, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XZ"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    self.cal
-                                        .mag_measurements()
-                                        .iter()
-                                        .map(|p| [p.y, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("YZ"),
-                            );
-
-                            let mag_measurements_with_cal = self.cal.mag_measurements_with_cal();
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    mag_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.x, p.y])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XY (cal)"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    mag_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.x, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("XZ (cal)"),
-                            );
-
-                            plot_ui.points(
-                                egui_plot::Points::new(
-                                    mag_measurements_with_cal
-                                        .iter()
-                                        .map(|p| [p.y, p.z])
-                                        .collect::<Vec<_>>(),
-                                )
-                                .name("YZ (cal)"),
-                            );
-                        });
-                });
+                if let Some(cal_data) = self.cal_data {
+                    let measurements_with_cal = self.cal.mag_measurements_with_cal();
+                    plot_window(ctx, "Mag (calibrated)", "µT", &measurements_with_cal);
+                }
             }
         });
 
         ctx.request_repaint();
     }
+}
+
+fn plot_window(
+    ctx: &egui::Context,
+    window_title: &str,
+    unit: &str,
+    data: &Vec<nalgebra::Vector3<f64>>,
+) {
+    egui::Window::new(window_title).show(ctx, |ui| {
+        egui_plot::Plot::new(window_title)
+            .allow_zoom(true)
+            .allow_drag(true)
+            .allow_scroll(false)
+            .allow_boxed_zoom(false)
+            .data_aspect(1.0)
+            .view_aspect(1.0)
+            .x_axis_label(unit)
+            .y_axis_label(unit)
+            .legend(Legend::default())
+            .show(ui, |plot_ui| {
+                plot_ui.points(
+                    egui_plot::Points::new(data.iter().map(|p| [p.x, p.y]).collect::<Vec<_>>())
+                        .name("XY"),
+                );
+
+                plot_ui.points(
+                    egui_plot::Points::new(data.iter().map(|p| [p.x, p.z]).collect::<Vec<_>>())
+                        .name("XZ"),
+                );
+
+                plot_ui.points(
+                    egui_plot::Points::new(data.iter().map(|p| [p.y, p.z]).collect::<Vec<_>>())
+                        .name("YZ"),
+                );
+            });
+    });
 }

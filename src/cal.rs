@@ -10,22 +10,22 @@ use nalgebra::{Dyn, Matrix3, Vector3, U10};
 
 #[derive(Debug, Clone, Copy)]
 pub struct ImuData {
-    pub lin_acc: nalgebra::Vector3<f64>,
-    pub ang_vel: nalgebra::Vector3<f64>,
+    pub lin_acc: Vector3<f64>,
+    pub ang_vel: Vector3<f64>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct MagData {
-    pub field: nalgebra::Vector3<f64>,
+    pub field: Vector3<f64>,
 }
 
 #[derive(Debug, Clone, Copy, serde::Serialize)]
 pub struct CalData {
-    pub gyro_offset: nalgebra::Vector3<f64>,
-    pub acc_offset: nalgebra::Vector3<f64>,
-    pub acc_scale: nalgebra::Vector3<f64>,
+    pub gyro_offset: Vector3<f64>,
+    pub acc_offset: Vector3<f64>,
+    pub acc_scale: Vector3<f64>,
     pub soft_iron_transf: nalgebra::Matrix3<f64>,
-    pub hard_iron_bias: nalgebra::Vector3<f64>,
+    pub hard_iron_bias: Vector3<f64>,
 }
 
 impl CalData {
@@ -36,12 +36,12 @@ impl CalData {
 
 #[derive(Debug)]
 pub struct Cal {
-    gyro_points: Vec<nalgebra::Vector3<f64>>,
-    acc_points: Vec<nalgebra::Vector3<f64>>,
-    mag_points: Vec<nalgebra::Vector3<f64>>,
+    gyro_points: Vec<Vector3<f64>>,
+    acc_points: Vec<Vector3<f64>>,
+    mag_points: Vec<Vector3<f64>>,
 
-    acc_points_avg: nalgebra::Vector3<f64>,
-    gyro_points_avg: nalgebra::Vector3<f64>,
+    acc_points_avg: Vector3<f64>,
+    gyro_points_avg: Vector3<f64>,
 
     cal_data: Option<CalData>,
 }
@@ -83,7 +83,7 @@ impl Cal {
         self.mag_points.extend_from_slice(&data["mag"]);
     }
 
-    pub fn add_acc_measurement_still(&mut self, data: nalgebra::Vector3<f64>) {
+    pub fn add_acc_measurement_still(&mut self, data: Vector3<f64>) {
         let alpha = 0.95;
         self.acc_points_avg = self.acc_points_avg * alpha + data * (1.0 - alpha);
 
@@ -92,7 +92,7 @@ impl Cal {
         }
     }
 
-    pub fn add_gyro_measurement_still(&mut self, data: nalgebra::Vector3<f64>) {
+    pub fn add_gyro_measurement_still(&mut self, data: Vector3<f64>) {
         let alpha = 0.98;
         self.gyro_points_avg = self.gyro_points_avg * alpha + data * (1.0 - alpha);
 
@@ -101,27 +101,27 @@ impl Cal {
         }
     }
 
-    pub fn add_gyro_measurement(&mut self, data: nalgebra::Vector3<f64>) {
+    pub fn add_gyro_measurement(&mut self, data: Vector3<f64>) {
         self.gyro_points.push(data);
     }
 
-    pub fn add_acc_measurement(&mut self, data: nalgebra::Vector3<f64>) {
+    pub fn add_acc_measurement(&mut self, data: Vector3<f64>) {
         self.acc_points.push(data);
     }
 
-    pub fn add_mag_measurement(&mut self, data: nalgebra::Vector3<f64>) {
+    pub fn add_mag_measurement(&mut self, data: Vector3<f64>) {
         self.mag_points.push(data);
     }
 
-    pub fn gyro_measurements(&self) -> &Vec<nalgebra::Vector3<f64>> {
+    pub fn gyro_measurements(&self) -> &Vec<Vector3<f64>> {
         &self.gyro_points
     }
 
-    pub fn acc_measurements(&self) -> &Vec<nalgebra::Vector3<f64>> {
+    pub fn acc_measurements(&self) -> &Vec<Vector3<f64>> {
         &self.acc_points
     }
 
-    pub fn gyro_measurements_with_cal(&self) -> Vec<nalgebra::Vector3<f64>> {
+    pub fn gyro_measurements_with_cal(&self) -> Vec<Vector3<f64>> {
         if let Some(cal_data) = self.cal_data {
             self.gyro_points
                 .iter()
@@ -132,7 +132,7 @@ impl Cal {
         }
     }
 
-    pub fn acc_measurements_with_cal(&self) -> Vec<nalgebra::Vector3<f64>> {
+    pub fn acc_measurements_with_cal(&self) -> Vec<Vector3<f64>> {
         if let Some(cal_data) = self.cal_data {
             self.acc_points
                 .iter()
@@ -143,7 +143,7 @@ impl Cal {
         }
     }
 
-    pub fn mag_measurements_with_cal(&self) -> Vec<nalgebra::Vector3<f64>> {
+    pub fn mag_measurements_with_cal(&self) -> Vec<Vector3<f64>> {
         if let Some(cal_data) = self.cal_data {
             self.mag_points
                 .iter()
@@ -154,7 +154,7 @@ impl Cal {
         }
     }
 
-    pub fn mag_measurements(&self) -> &Vec<nalgebra::Vector3<f64>> {
+    pub fn mag_measurements(&self) -> &Vec<Vector3<f64>> {
         &self.mag_points
     }
 
@@ -178,7 +178,7 @@ impl Cal {
             let sum_z: f64 = self.gyro_points.iter().map(|p| p.z).sum();
             let count = self.gyro_points.len() as f64;
 
-            nalgebra::Vector3::new(sum_x / count, sum_y / count, sum_z / count)
+            Vector3::new(sum_x / count, sum_y / count, sum_z / count)
         };
 
         // acc
@@ -227,7 +227,7 @@ impl Cal {
             let sz_p = z_p.iter().sum::<f64>() / z_p.len() as f64;
             let sz_m = z_m.iter().sum::<f64>() / z_m.len() as f64;
 
-            nalgebra::Vector3::new(sx_p + sx_m, sy_p + sy_m, sz_p + sz_m)
+            Vector3::new(sx_p + sx_m, sy_p + sy_m, sz_p + sz_m)
         };
         let acc_scale = {
             let range_x: f64 = (x_p.iter().sum::<f64>() / x_p.len() as f64)
@@ -241,7 +241,7 @@ impl Cal {
             let scale_y = 2.0 * G0 / range_y;
             let scale_z = 2.0 * G0 / range_z;
 
-            nalgebra::Vector3::new(scale_x, scale_y, scale_z)
+            Vector3::new(scale_x, scale_y, scale_z)
         };
 
         // mag
@@ -266,7 +266,7 @@ impl Cal {
     pub fn cac_mag_params_from_fit(
         f: f64, // magnitude of the magnetic field, this can be 1.0 for navigation as the magnitude does not matter
         m: nalgebra::Matrix3<f64>,
-        n: nalgebra::Vector3<f64>,
+        n: Vector3<f64>,
         d: f64,
     ) -> (Matrix3<f64>, Vector3<f64>) {
         let m_1 = m.try_inverse().unwrap();
@@ -283,8 +283,8 @@ impl Cal {
     }
 
     pub fn fit_mag_ellipsoid(
-        mag_points: &[nalgebra::Vector3<f64>],
-    ) -> (nalgebra::Matrix3<f64>, nalgebra::Vector3<f64>, f64) {
+        mag_points: &[Vector3<f64>],
+    ) -> (nalgebra::Matrix3<f64>, Vector3<f64>, f64) {
         // refs:
         // https://ieeexplore.ieee.org/abstract/document/1290055/
         // https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py
