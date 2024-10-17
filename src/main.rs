@@ -20,9 +20,9 @@ fn main() {
         })
     });
 
-    let (rn, mut node, imu_rx, mag_rx) = ros_node::Node::new();
+    let (_rn, mut node, imu_rx, mag_rx) = ros_node::Node::new();
 
-    let ros_task = tokio::task::spawn_blocking(move || loop {
+    let _ros_task = tokio::task::spawn_blocking(move || loop {
         node.spin_once(std::time::Duration::from_millis(1));
     });
 

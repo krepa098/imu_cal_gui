@@ -7,8 +7,13 @@ edition = "2021"
 tokio = { version = "1.40.0", features = ["full"] }
 nalgebra = "0.33.0"
 futures = "0.3.31"
-r2r = { version = "0.9" }
+r2r = "0.9"
 eframe = "0.29.1"
 env_logger = "0.11.5"
 egui_plot = "0.29.0"
 egui-modal = "0.5.0"
+
+[dependencies.nalgebra-lapack]
+version = "0.25.0"
+default-features = false
+features = [ "openblas" ]

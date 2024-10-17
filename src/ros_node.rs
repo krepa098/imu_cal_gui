@@ -17,7 +17,6 @@ impl Node {
 
         let ctx = r2r::Context::create().unwrap();
         let mut node = r2r::Node::create(ctx, "imu_cal", "").unwrap();
-        let clock = node.get_ros_clock();
 
         let imu_sub = node
             .subscribe::<sensor_msgs::msg::Imu>("/robot/rcu_com/imu", QosProfile::default())

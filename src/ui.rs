@@ -26,6 +26,9 @@ struct MyApp {
     collect_mag: bool,
     collect_gyro: bool,
     collect_acc: bool,
+    show_mag: bool,
+    show_gyro: bool,
+    show_acc: bool,
     filter_standstill: bool,
     cal_data: Option<CalData>,
 }
@@ -39,6 +42,9 @@ impl MyApp {
             collect_mag: false,
             collect_gyro: true,
             collect_acc: false,
+            show_gyro: true,
+            show_acc: true,
+            show_mag: true,
             filter_standstill: false,
             cal_data: None,
         }
@@ -76,7 +82,7 @@ impl eframe::App for MyApp {
         modal_cal_data.show(|ui| {
             let cal_data = self.cal_data.as_ref().unwrap();
             let info = format!(
-                "Gyro offset: [{:+e}, {:+e}, {:+e}]\nAcc offset: [{:+e}, {:+e}, {:+e}]\nAcc scale: [{:+e}, {:+e}, {:+e}]",
+                "Gyro offset: [{:+e}, {:+e}, {:+e}] in rad/s\nAcc offset: [{:+e}, {:+e}, {:+e}] in m/s²\nAcc scale: [{:+e}, {:+e}, {:+e}] (ul)",
                 cal_data.gyro_offset.x,
                 cal_data.gyro_offset.y,
                 cal_data.gyro_offset.z,
@@ -88,7 +94,7 @@ impl eframe::App for MyApp {
                 cal_data.acc_scale.z
             );
 
-            modal_cal_data.title(ui, "Calibration Data");
+            modal_cal_data.title(ui, "Calibration Results");
             modal_cal_data.frame(ui, |ui| {
                 modal_cal_data.body(ui, info.clone());
             });
@@ -110,15 +116,26 @@ impl eframe::App for MyApp {
             ui.separator();
 
             ui.heading("Clear Data");
-            if ui.button("🗑 gyro").clicked() {
-                self.cal.clear_gyro_measurements();
-            }
-            if ui.button("🗑 accel").clicked() {
-                self.cal.clear_accel_measurements();
-            }
-            if ui.button("🗑 mag").clicked() {
-                self.cal.clear_mag_measurements();
-            }
+            egui::Grid::new("grid")
+                .num_columns(2)
+                .striped(true)
+                .show(ui, |ui| {
+                    ui.label("Gyro");
+                    if ui.button("🗑").clicked() {
+                        self.cal.clear_gyro_measurements();
+                    }
+                    ui.end_row();
+                    ui.label("Accel");
+                    if ui.button("🗑").clicked() {
+                        self.cal.clear_accel_measurements();
+                    }
+                    ui.end_row();
+                    ui.label("Mag");
+                    if ui.button("🗑").clicked() {
+                        self.cal.clear_mag_measurements();
+                    }
+                });
+
             ui.separator();
 
             ui.heading("Filter");
@@ -137,11 +154,19 @@ impl eframe::App for MyApp {
                 self.cal_data = Some(self.cal.calibrate());
                 modal_cal_data.open();
             }
+            ui.separator();
+
+            ui.heading("View");
+            ui.toggle_value(&mut self.show_gyro, "Gyro");
+            ui.toggle_value(&mut self.show_acc, "Accel");
+            ui.toggle_value(&mut self.show_mag, "Mag");
+
+            ui.separator();
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             // gyro plot
-            if self.collect_gyro {
+            if self.show_gyro {
                 egui::Window::new("Gyro").show(ctx, |ui| {
                     egui_plot::Plot::new("gyro_plot")
                         .allow_zoom(true)
@@ -223,7 +248,7 @@ impl eframe::App for MyApp {
             }
 
             // acc plot
-            if self.collect_acc {
+            if self.show_acc {
                 egui::Window::new("Accelerometer").show(ctx, |ui| {
                     egui_plot::Plot::new("acc_plot")
                         .allow_zoom(true)
@@ -232,8 +257,8 @@ impl eframe::App for MyApp {
                         .allow_scroll(false)
                         .data_aspect(1.0)
                         .view_aspect(1.0)
-                        .x_axis_label("m/s^2")
-                        .y_axis_label("m/s^2")
+                        .x_axis_label("m/s²")
+                        .y_axis_label("m/s²")
                         .legend(Legend::default())
                         .show(ui, |plot_ui| {
                             plot_ui.points(
@@ -305,7 +330,7 @@ impl eframe::App for MyApp {
             }
 
             // gyro plot
-            if self.collect_mag {
+            if self.show_mag {
                 egui::Window::new("Mag").show(ctx, |ui| {
                     egui_plot::Plot::new("mag_plot")
                         .allow_zoom(true)
@@ -314,8 +339,8 @@ impl eframe::App for MyApp {
                         .allow_boxed_zoom(false)
                         .data_aspect(1.0)
                         .view_aspect(1.0)
-                        .x_axis_label("T")
-                        .y_axis_label("T")
+                        .x_axis_label("µT")
+                        .y_axis_label("µT")
                         .legend(Legend::default())
                         .show(ui, |plot_ui| {
                             plot_ui.points(
