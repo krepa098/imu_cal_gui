@@ -34,6 +34,7 @@ impl CalData {
     }
 
     pub fn as_json_string(&self) -> String {
+        // note: matrices format is column-major
         serde_json::to_string_pretty(self).unwrap()
     }
 }
