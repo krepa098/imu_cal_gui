@@ -10,7 +10,7 @@ use egui_plot::Legend;
 pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Result {
     env_logger::init();
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([1024.0, 768.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([1600.0, 900.0]),
         ..Default::default()
     };
     eframe::run_native(
