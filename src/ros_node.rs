@@ -1,12 +1,9 @@
 use std::sync::mpsc::Receiver;
-use std::sync::Arc;
-use std::time::Duration;
 
 use crate::cal::{ImuData, MagData};
 use futures::{future, StreamExt};
 use r2r::sensor_msgs;
-use r2r::{Clock, QosProfile};
-use tokio::sync::Mutex;
+use r2r::QosProfile;
 
 pub struct Node {}
 

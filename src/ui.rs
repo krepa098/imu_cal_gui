@@ -1,11 +1,10 @@
 use std::sync::mpsc::Receiver;
 
 use crate::cal::*;
-use eframe::egui::{self, Color32};
-use egui::{menu, Button};
+use eframe::egui::{self};
+use egui::menu;
 use egui_modal::Modal;
 use egui_plot::Legend;
-use r2r::sensor_msgs;
 
 pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Result {
     env_logger::init();
@@ -16,7 +15,7 @@ pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Res
     eframe::run_native(
         "IMU Calibration GUI",
         options,
-        Box::new(|cc| Ok(Box::new(MyApp::new(imu_rx, mag_rx)))),
+        Box::new(|_cc| Ok(Box::new(MyApp::new(imu_rx, mag_rx)))),
     )
 }
 
@@ -189,7 +188,7 @@ impl eframe::App for MyApp {
             ui.separator();
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ctx, |_ui| {
             // gyro plot
             if self.show_gyro {
                 egui::Window::new("Gyro").show(ctx, |ui| {

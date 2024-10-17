@@ -4,9 +4,7 @@ mod cal;
 mod ros_node;
 mod ui;
 
-use std::{io::Write, sync::Arc};
-use tokio::sync::Mutex;
-use tokio::time::{sleep, Duration};
+use tokio::time::Duration;
 
 fn main() {
     let rt = tokio::runtime::Runtime::new().expect("Unable to create Runtime");

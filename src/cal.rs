@@ -6,8 +6,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-use nalgebra::{linalg, Matrix3, Vector3};
-use nalgebra::{Dynamic, U10};
+use nalgebra::{Dyn, Matrix3, Vector3, U10};
 
 #[derive(Debug, Clone, Copy)]
 pub struct ImuData {
@@ -186,7 +185,7 @@ impl Cal {
         if let Some(cal_data) = self.cal_data {
             self.mag_points
                 .iter()
-                .map(|p| self.cal_data.unwrap().apply_mag_cal(p))
+                .map(|p| cal_data.apply_mag_cal(p))
                 .collect::<Vec<_>>()
         } else {
             vec![]
@@ -280,8 +279,6 @@ impl Cal {
             let scale_y = 2.0 * G0 / range_y;
             let scale_z = 2.0 * G0 / range_z;
 
-            let count = self.acc_points.len() as f64;
-
             nalgebra::Vector3::new(scale_x, scale_y, scale_z)
         };
 
@@ -320,8 +317,6 @@ impl Cal {
 
         let a_1 = m_msqrt * (f / x1_sqrt[0]);
 
-        println!("a_1 {}", a_1);
-
         (a_1, b)
     }
 
@@ -333,7 +328,7 @@ impl Cal {
         // https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py
         // https://teslabs.com/articles/magnetometer-calibration/
 
-        type Matrix10xNf64 = nalgebra::OMatrix<f64, U10, Dynamic>;
+        type Matrix10xNf64 = nalgebra::OMatrix<f64, U10, Dyn>;
 
         let d_cols: Vec<_> = mag_points
             .iter()
@@ -386,8 +381,6 @@ impl Cal {
         let s_22_inv = s_22.try_inverse().unwrap();
 
         let e = c_inv * (s_11 - s_12 * (s_22_inv * s_21));
-
-        let sd = nalgebra::Schur::new(e);
 
         let e_eigen = nalgebra_lapack::Eigen::new(e, true, true).unwrap();
 
