@@ -248,8 +248,12 @@ impl Cal {
         //
         // refs:
         // https://teslabs.com/articles/magnetometer-calibration/
-        let (m, n, d) = Self::fit_mag_ellipsoid(&self.mag_points);
-        let (a1, b) = Self::cac_mag_params_from_fit(F0, m, n, d);
+        let (a1, b) = if !self.mag_points.is_empty() {
+            let (m, n, d) = Self::fit_mag_ellipsoid(&self.mag_points);
+            Self::cac_mag_params_from_fit(F0, m, n, d)
+        } else {
+            (Matrix3::identity(), Vector3::zeros())
+        };
 
         let cal_data = CalData {
             gyro_offset,
