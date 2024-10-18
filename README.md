@@ -15,21 +15,61 @@ This is a simple GUI that helps you calibrate your IMU (accelerometer, gyroscope
 
 [*] Some example measurements are provided in the `test_files` folder.
 
-## ROS Topics
-
-This applications receives data from the following ROS topics and follows the conventions described in their respective message definitions:
-* `/imu` of type [sensor_msgs/msg/Imu](https://docs.ros2.org/foxy/api/sensor_msgs/msg/Imu.html)
-* `/mag` of type [sensor_msgs/msg/MagneticField](https://docs.ros2.org/foxy/api/sensor_msgs/msg/MagneticField.html)
-
 ## How to run?
 
-This does require a working ROS2 setup (Foxy or more recent).
+The data provider is selected at compile time. You may chose to use the ROS2 **or** serial data provider.
+
+### ROS2 Data Provider
+
+The ROS2 data provider requires a working ROS2 setup (Foxy or more recent).
 Make sure your ROS install is sourced, then run:
 
 ```
 git clone https://github.com/krepa098/imu_cal_gui.git
 cd imu_cal_gui
 cargo r --release
+```
+
+#### ROS Topics
+
+Data is received from the following ROS topics and follows the conventions described in their respective message definitions:
+* `/imu` of type [sensor_msgs/msg/Imu](https://docs.ros2.org/foxy/api/sensor_msgs/msg/Imu.html)
+* `/mag` of type [sensor_msgs/msg/MagneticField](https://docs.ros2.org/foxy/api/sensor_msgs/msg/MagneticField.html)
+
+
+### Serial Port Data Provider
+
+The serial data provider receives its data via the serial port (e.g, from an Arduino).
+
+Run:
+
+```
+git clone https://github.com/krepa098/imu_cal_gui.git
+cd imu_cal_gui
+cargo r --release --no-default-features
+```
+
+#### Serial Data Format
+
+The serial data is required to be formatted as follows:
+
+```
+mag %f %f %f\n
+imu %f %f %f %f %f %f\n
+```
+
+e.g.,
+
+```
+mag -32.556152 26.770020 -74.780273
+imu 2.502441 2.868652 1.831055 0.009644 0.004761 0.991821
+```
+
+where each value designates
+
+```
+mag <field_x> <field_y> <field_z>
+imu <gyro_x> <gyro_y> <gyro_z> <acc_x> <acc_y> <acc_z>
 ```
 
 
