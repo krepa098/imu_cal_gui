@@ -22,13 +22,9 @@ jobs:
                 compiler: gcc
                 version: 13
 
-            - run: |
-              ${{ env.FC }} ... # environment vars FC, CC, and CXX are set
-              ${{ steps.setup-fortran.outputs.fc }} ... # outputs work too
-
             # build exe
             - name: build
-              run: cargo build --release --no-default-features
+              run: ${{ env.FC }} cargo build --release --no-default-features
               working-directory: ${{ github.workspace }}
             
             # artifact
