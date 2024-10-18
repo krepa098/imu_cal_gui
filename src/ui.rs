@@ -6,8 +6,61 @@ use eframe::egui::{Style, Visuals};
 use egui::menu;
 use egui_modal::Modal;
 use egui_plot::Legend;
+use std::time::{Duration, Instant};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[derive(Debug)]
+struct MessageRate {
+    last_interval: Instant,
+    avg_rate: f32, // messages per second
+    message_count: usize,
+}
+
+impl Default for MessageRate {
+    fn default() -> Self {
+        Self {
+            last_interval: Instant::now(),
+            avg_rate: 0.0,
+            message_count: 0,
+        }
+    }
+}
+
+impl MessageRate {
+    pub fn received(&mut self) {
+        self.message_count += 1;
+
+        if self.last_interval.elapsed() > Duration::from_secs(1) {
+            if self.message_count > 0 {
+                let rate = self.message_count as f32;
+
+                let alpha = 0.4;
+                self.avg_rate = self.avg_rate * (alpha) + rate * (1.0 - alpha);
+            } else {
+                self.avg_rate = 0.0;
+            }
+
+            self.last_interval = Instant::now();
+            self.message_count = 0;
+        }
+    }
+
+    pub fn hz(&self) -> Option<f32> {
+        if self.avg_rate == 0.0 || self.last_interval.elapsed() > Duration::from_secs(3) {
+            None
+        } else {
+            Some(self.avg_rate)
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self.hz() {
+            Some(hz) => format!("{:.1} Hz", hz),
+            None => "-".to_string(),
+        }
+    }
+}
 
 enum PlotType {
     Scatter,
@@ -62,6 +115,10 @@ struct MyApp {
     gyro_cal_plot_type: PlotType,
     acc_cal_plot_type: PlotType,
     mag_cal_plot_type: PlotType,
+
+    gyro_rate: MessageRate,
+    acc_rate: MessageRate,
+    mag_rate: MessageRate,
 }
 
 impl MyApp {
@@ -84,6 +141,9 @@ impl MyApp {
             gyro_cal_plot_type: PlotType::Scatter,
             acc_cal_plot_type: PlotType::Scatter,
             mag_cal_plot_type: PlotType::Scatter,
+            gyro_rate: Default::default(),
+            acc_rate: Default::default(),
+            mag_rate: Default::default(),
         }
     }
 }
@@ -92,6 +152,7 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         while let Ok(msg) = self.imu_rx.try_recv() {
             if self.collect_acc {
+                self.acc_rate.received();
                 if self.filter_standstill {
                     self.cal.add_acc_measurement_still(msg.lin_acc);
                 } else {
@@ -100,6 +161,7 @@ impl eframe::App for MyApp {
             }
 
             if self.collect_gyro {
+                self.gyro_rate.received();
                 if self.filter_standstill {
                     self.cal.add_gyro_measurement_still(msg.ang_vel);
                 } else {
@@ -110,6 +172,7 @@ impl eframe::App for MyApp {
 
         while let Ok(msg) = self.mag_rx.try_recv() {
             if self.collect_mag {
+                self.mag_rate.received();
                 self.cal.add_mag_measurement(msg.field);
             }
         }
@@ -227,9 +290,18 @@ impl eframe::App for MyApp {
                 }
             });
 
-            ui.toggle_value(&mut self.collect_gyro, "Gyro");
-            ui.toggle_value(&mut self.collect_acc, "Accel");
-            ui.toggle_value(&mut self.collect_mag, "Mag");
+            egui::Grid::new("data_sizrce_grid").show(ui, |ui| {
+                ui.toggle_value(&mut self.collect_gyro, "Gyro");
+                ui.label(self.gyro_rate.to_string());
+                ui.end_row();
+                ui.toggle_value(&mut self.collect_acc, "Accel");
+                ui.label(self.acc_rate.to_string());
+                ui.end_row();
+                ui.toggle_value(&mut self.collect_mag, "Mag");
+                ui.label(self.mag_rate.to_string());
+                ui.end_row();
+            });
+
             ui.separator();
 
             ui.add_space(5.0);

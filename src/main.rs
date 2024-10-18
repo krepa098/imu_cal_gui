@@ -15,7 +15,7 @@ fn main() {
     std::thread::spawn(move || {
         rt.block_on(async {
             loop {
-                node.spin_once(Duration::from_millis(100));
+                node.spin_once(Duration::from_millis(1));
             }
         })
     });
