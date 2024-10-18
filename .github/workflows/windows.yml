@@ -22,17 +22,18 @@ jobs:
                 compiler: gcc
                 version: 13
 
-
             - name: Check Compilers and Versions
               run: |
                 echo $env:FC
                 cmake --version
-                python --version
+                cargo --version
 
             # build exe
             - name: build
               run: cargo build --release --no-default-features
               working-directory: ${{ github.workspace }}
+              env:
+                FC: ${{ steps.setup-fortran.outputs.fc }}
             
             # artifact
             - uses: actions/upload-artifact@v4
