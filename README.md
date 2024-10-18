@@ -11,7 +11,9 @@ This is a simple GUI that helps you calibrate your IMU (accelerometer, gyroscope
 * Magnetometer soft- and hard-iron calibration
 * Interactive plots (scatter and histogram)
 * Save and load measurements (json) [*]
-* ROS2 integration to receive sensor messages
+* Data providers
+    * ROS2
+    * Serial port
 
 [*] Some example measurements are provided in the `test_files` folder.
 
