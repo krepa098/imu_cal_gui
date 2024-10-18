@@ -1,7 +1,7 @@
 use std::sync::mpsc::Receiver;
 
 use crate::cal::*;
-use eframe::egui::{self};
+use eframe::egui::{self, Color32, RichText};
 use eframe::egui::{Style, Visuals};
 use egui::menu;
 use egui_modal::Modal;
@@ -211,41 +211,51 @@ impl eframe::App for MyApp {
             });
             ui.separator();
 
+            ui.add_space(5.0);
             ui.heading("Data Sources");
             ui.toggle_value(&mut self.collect_gyro, "Gyro");
             ui.toggle_value(&mut self.collect_acc, "Accel");
             ui.toggle_value(&mut self.collect_mag, "Mag");
             ui.separator();
 
-            ui.heading("Clear Data");
+            ui.add_space(5.0);
+            ui.heading("Data Points");
             egui::Grid::new("grid")
-                .num_columns(2)
+                .num_columns(3)
                 .striped(true)
                 .show(ui, |ui| {
                     ui.label("Gyro");
-                    if ui.button("🗑").clicked() {
+                    ui.label(format!("{}", self.cal.gyro_measurements().len()));
+                    if ui.button("🗑").on_hover_text("clear").clicked() {
                         self.cal.clear_gyro_measurements();
                     }
                     ui.end_row();
                     ui.label("Accel");
-                    if ui.button("🗑").clicked() {
+                    ui.label(format!("{}", self.cal.acc_measurements().len()));
+                    if ui.button("🗑").on_hover_text("clear").clicked() {
                         self.cal.clear_accel_measurements();
                     }
                     ui.end_row();
                     ui.label("Mag");
-                    if ui.button("🗑").clicked() {
+                    ui.label(format!("{}", self.cal.mag_measurements().len()));
+                    if ui.button("🗑").on_hover_text("clear").clicked() {
                         self.cal.clear_mag_measurements();
                     }
                 });
 
             ui.separator();
 
+            ui.add_space(5.0);
             ui.heading("Filter");
             ui.checkbox(&mut self.filter_standstill, "Await standstill");
             ui.separator();
 
+            ui.add_space(5.0);
             ui.heading("Calibration");
-            if ui.button("Calibrate now").clicked() {
+            if ui
+                .button(RichText::new("Calibrate now").color(Color32::LIGHT_GREEN))
+                .clicked()
+            {
                 self.cal_data = Some(self.cal.calibrate());
                 modal_cal_data.open();
             }
@@ -256,6 +266,7 @@ impl eframe::App for MyApp {
             }
             ui.separator();
 
+            ui.add_space(5.0);
             ui.heading("View");
             ui.toggle_value(&mut self.show_gyro, "Gyro");
             ui.toggle_value(&mut self.show_acc, "Accel");
@@ -344,7 +355,7 @@ fn plot_window(
     data: &[nalgebra::Vector3<f64>],
 ) {
     egui::Window::new(window_title).show(ctx, |ui| {
-        ui.horizontal_top(|ui| {
+        ui.horizontal(|ui| {
             ui.selectable_value(plot_type, PlotType::Scatter, "Scatter");
             ui.selectable_value(plot_type, PlotType::Histogram(10), "Histogram");
 

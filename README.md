@@ -9,10 +9,11 @@ This is a simple GUI that helps you calibrate your IMU (accelerometer, gyroscope
 * Gyro offset calibration
 * Accelerometer offset and scale calibration
 * Magnetometer soft- and hard-iron calibration
-* Save and load measurements [*]
+* Interactive plots (scatter and histogram)
+* Save and load measurements (json) [*]
 * ROS2 integration to receive sensor messages
 
-[*] Some example measurements are provided in the `test files` folder.
+[*] Some example measurements are provided in the `test_files` folder.
 
 ## ROS Topics
 
@@ -34,8 +35,8 @@ cargo r --release
 
 ## Acknowledgements
 
-* The code is in part based on `nliaudat`'s Python implementation found [here](https://github.com/nliaudat/magnetometer_calibration).
-* `TESLABS` magnetometer calibration explanations found [here](https://teslabs.com/articles/magnetometer-calibration/)
+* The magnetometer calibration code is in part based on `nliaudat`'s Python implementation found [here](https://github.com/nliaudat/magnetometer_calibration).
+* `TESLABS` magnetometer calibration guide found [here](https://teslabs.com/articles/magnetometer-calibration/)
 
 ## License
 
