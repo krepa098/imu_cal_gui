@@ -1,5 +1,6 @@
 use std::sync::mpsc::Receiver;
 
+use crate::data_provider::DataProviderUi;
 use crate::data_provider::{ImuData, MagData};
 use futures::{future, StreamExt};
 use r2r::sensor_msgs;
@@ -65,5 +66,13 @@ impl Node {
         });
 
         (Self {}, node, imu_rx, mag_rx)
+    }
+}
+
+impl DataProviderUi for Node {
+    fn show(&mut self, ui: &mut eframe::egui::Ui) {
+        ui.heading("Ros Topics");
+        ui.label("/imu");
+        ui.label("/mag");
     }
 }
