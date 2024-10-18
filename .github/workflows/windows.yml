@@ -30,7 +30,7 @@ jobs:
 
             - name: Install OpenBLAS by vcpkg
               run: |
-                ./vcpkg/vcpkg.exe install openblas:${{ matrix.triple }}
+                ./vcpkg/vcpkg.exe install openblas:x64-windows
 
             # build exe
             - name: build
