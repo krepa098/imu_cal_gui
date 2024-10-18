@@ -27,3 +27,7 @@ scanf = "1.2.1"
 [features]
 ros = ["dep:r2r"]
 default = ["ros"]
+
+[profile.release]
+strip = true
+lto = true
