@@ -19,8 +19,12 @@ jobs:
             - uses: fortran-lang/setup-fortran@v1
               id: setup-fortran
               with:
-                compiler: intel
-                version: '2024.1'
+                compiler: gcc
+                version: 13
+
+            - run: |
+              ${{ env.FC }} ... # environment vars FC, CC, and CXX are set
+              ${{ steps.setup-fortran.outputs.fc }} ... # outputs work too
 
             # build exe
             - name: build
