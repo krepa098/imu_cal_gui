@@ -115,7 +115,6 @@ impl eframe::App for MyApp {
         }
 
         let modal_cal_data = Modal::new(ctx, "cal_data");
-        // What goes inside the modal
         modal_cal_data.show(|ui| {
             let cal_data = self.cal_data.as_ref().unwrap();
 
@@ -214,7 +213,20 @@ impl eframe::App for MyApp {
             ui.separator();
 
             ui.add_space(5.0);
-            ui.heading("Data Sources");
+            ui.horizontal(|ui| {
+                ui.heading("Data Sources");
+                if ui.button("🔀").on_hover_text("all").clicked() {
+                    self.collect_acc = true;
+                    self.collect_gyro = true;
+                    self.collect_mag = true;
+                }
+                if ui.button("🚫").on_hover_text("none").clicked() {
+                    self.collect_acc = false;
+                    self.collect_gyro = false;
+                    self.collect_mag = false;
+                }
+            });
+
             ui.toggle_value(&mut self.collect_gyro, "Gyro");
             ui.toggle_value(&mut self.collect_acc, "Accel");
             ui.toggle_value(&mut self.collect_mag, "Mag");
