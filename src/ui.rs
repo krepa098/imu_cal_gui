@@ -57,6 +57,9 @@ struct MyApp {
     gyro_plot_type: PlotType,
     acc_plot_type: PlotType,
     mag_plot_type: PlotType,
+    gyro_cal_plot_type: PlotType,
+    acc_cal_plot_type: PlotType,
+    mag_cal_plot_type: PlotType,
 }
 
 impl MyApp {
@@ -76,6 +79,9 @@ impl MyApp {
             gyro_plot_type: PlotType::Scatter,
             acc_plot_type: PlotType::Scatter,
             mag_plot_type: PlotType::Scatter,
+            gyro_cal_plot_type: PlotType::Scatter,
+            acc_cal_plot_type: PlotType::Scatter,
+            mag_cal_plot_type: PlotType::Scatter,
         }
     }
 }
@@ -273,7 +279,7 @@ impl eframe::App for MyApp {
                     let measurements_with_cal = self.cal.gyro_measurements_with_cal();
                     plot_window(
                         ctx,
-                        &mut self.gyro_plot_type,
+                        &mut self.gyro_cal_plot_type,
                         "Gyro (calibrated)",
                         "rad/s",
                         &measurements_with_cal,
@@ -295,7 +301,7 @@ impl eframe::App for MyApp {
                     let measurements_with_cal = self.cal.acc_measurements_with_cal();
                     plot_window(
                         ctx,
-                        &mut self.acc_plot_type,
+                        &mut self.acc_cal_plot_type,
                         "Accel (calibrated)",
                         "m/s²",
                         &measurements_with_cal,
@@ -317,7 +323,7 @@ impl eframe::App for MyApp {
                     let measurements_with_cal = self.cal.mag_measurements_with_cal();
                     plot_window(
                         ctx,
-                        &mut self.mag_plot_type,
+                        &mut self.mag_cal_plot_type,
                         "Mag (calibrated)",
                         "µT",
                         &measurements_with_cal,
