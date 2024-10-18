@@ -19,8 +19,8 @@ jobs:
             - uses: fortran-lang/setup-fortran@v1
               id: setup-fortran
               with:
-                compiler: gcc
-                version: 13
+                compiler: intel
+                version: '2023.1'
 
             # build exe
             - name: build
