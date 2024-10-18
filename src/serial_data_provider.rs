@@ -118,8 +118,8 @@ impl DataProviderUi for SerialDataProvider {
                                 {
                                     imu_tx
                                         .send(ImuData {
-                                            lin_acc: vector![gyro_x, gyro_y, gyro_z],
-                                            ang_vel: vector![acc_x, acc_y, acc_z],
+                                            lin_acc: vector![acc_x, acc_y, acc_z],
+                                            ang_vel: vector![gyro_x, gyro_y, gyro_z],
                                         })
                                         .ok();
                                 }
