@@ -1,7 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::time::Duration;
-
 use serial_data_provider::SerialDataProvider;
 
 mod cal;
@@ -23,7 +21,7 @@ fn main() {
             std::thread::spawn(move || {
                 rt.block_on(async {
                     loop {
-                        node.spin_once(Duration::from_millis(1));
+                        node.spin_once(std::time::Duration::from_millis(1));
                     }
                 })
             });
