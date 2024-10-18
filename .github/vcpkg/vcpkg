@@ -1,0 +1,11 @@
+{
+    "dependencies": [
+        {
+            "name": "mlpack",
+            "default-features": true,
+            "features": [
+                "openmp"
+            ]
+        }
+    ]
+}
