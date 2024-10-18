@@ -22,9 +22,16 @@ jobs:
                 compiler: gcc
                 version: 13
 
+
+            - name: Check Compilers and Versions
+              run: |
+                echo $env:FC
+                cmake --version
+                python --version
+
             # build exe
             - name: build
-              run: ${{ env.FC }} cargo build --release --no-default-features
+              run: cargo build --release --no-default-features
               working-directory: ${{ github.workspace }}
             
             # artifact
