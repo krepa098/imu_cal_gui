@@ -7,6 +7,8 @@ use egui::menu;
 use egui_modal::Modal;
 use egui_plot::Legend;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 enum PlotType {
     Scatter,
     Histogram(usize),
@@ -27,7 +29,7 @@ pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Res
         ..Default::default()
     };
     eframe::run_native(
-        "IMU Calibration GUI",
+        &format!("IMU Calibration GUI {VERSION}"),
         options,
         Box::new(|cc| {
             let style = Style {
@@ -187,8 +189,8 @@ impl eframe::App for MyApp {
 
         egui::SidePanel::left("left_panel").show(ctx, |ui| {
             menu::bar(ui, |ui| {
-                ui.menu_button("File", |ui| {
-                    if ui.button("🗁 Open").clicked() {
+                ui.menu_button("🗀  File", |ui| {
+                    if ui.button("🗁    Open").clicked() {
                         if let Some(path) = rfd::FileDialog::new()
                             .add_filter("data", &["json"])
                             .pick_file()
@@ -197,7 +199,7 @@ impl eframe::App for MyApp {
                             ui.close_menu();
                         }
                     }
-                    if ui.button("🖴 Save").clicked() {
+                    if ui.button("🖴    Save").clicked() {
                         if let Some(mut path) = rfd::FileDialog::new()
                             .add_filter("data", &["json"])
                             .save_file()
@@ -226,19 +228,31 @@ impl eframe::App for MyApp {
                 .show(ui, |ui| {
                     ui.label("Gyro");
                     ui.label(format!("{}", self.cal.gyro_measurements().len()));
-                    if ui.button("🗑").on_hover_text("clear").clicked() {
+                    if ui
+                        .button(RichText::new("🗑").color(Color32::LIGHT_RED))
+                        .on_hover_text("clear")
+                        .clicked()
+                    {
                         self.cal.clear_gyro_measurements();
                     }
                     ui.end_row();
                     ui.label("Accel");
                     ui.label(format!("{}", self.cal.acc_measurements().len()));
-                    if ui.button("🗑").on_hover_text("clear").clicked() {
+                    if ui
+                        .button(RichText::new("🗑").color(Color32::LIGHT_RED))
+                        .on_hover_text("clear")
+                        .clicked()
+                    {
                         self.cal.clear_accel_measurements();
                     }
                     ui.end_row();
                     ui.label("Mag");
                     ui.label(format!("{}", self.cal.mag_measurements().len()));
-                    if ui.button("🗑").on_hover_text("clear").clicked() {
+                    if ui
+                        .button(RichText::new("🗑").color(Color32::LIGHT_RED))
+                        .on_hover_text("clear")
+                        .clicked()
+                    {
                         self.cal.clear_mag_measurements();
                     }
                 });
