@@ -7,6 +7,19 @@ use egui::menu;
 use egui_modal::Modal;
 use egui_plot::Legend;
 
+enum PlotType {
+    Scatter,
+    Histogram(usize),
+}
+
+impl PartialEq for PlotType {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
+}
+
 pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Result {
     env_logger::init();
     let options = eframe::NativeOptions {
@@ -40,6 +53,10 @@ struct MyApp {
     show_acc: bool,
     filter_standstill: bool,
     cal_data: Option<CalData>,
+
+    gyro_plot_type: PlotType,
+    acc_plot_type: PlotType,
+    mag_plot_type: PlotType,
 }
 
 impl MyApp {
@@ -56,6 +73,9 @@ impl MyApp {
             show_mag: true,
             filter_standstill: false,
             cal_data: None,
+            gyro_plot_type: PlotType::Scatter,
+            acc_plot_type: PlotType::Scatter,
+            mag_plot_type: PlotType::Scatter,
         }
     }
 }
@@ -241,31 +261,67 @@ impl eframe::App for MyApp {
         egui::CentralPanel::default().show(ctx, |_ui| {
             // gyro plot
             if self.show_gyro {
-                plot_window(ctx, "Gyro", "rad/s", self.cal.gyro_measurements());
+                plot_window(
+                    ctx,
+                    &mut self.gyro_plot_type,
+                    "Gyro",
+                    "rad/s",
+                    self.cal.gyro_measurements(),
+                );
 
                 if self.cal_data.is_some() {
                     let measurements_with_cal = self.cal.gyro_measurements_with_cal();
-                    plot_window(ctx, "Gyro (calibrated)", "rad/s", &measurements_with_cal);
+                    plot_window(
+                        ctx,
+                        &mut self.gyro_plot_type,
+                        "Gyro (calibrated)",
+                        "rad/s",
+                        &measurements_with_cal,
+                    );
                 }
             }
 
             // acc plot
             if self.show_acc {
-                plot_window(ctx, "Accel", "m/s²", self.cal.acc_measurements());
+                plot_window(
+                    ctx,
+                    &mut self.acc_plot_type,
+                    "Accel",
+                    "m/s²",
+                    self.cal.acc_measurements(),
+                );
 
                 if self.cal_data.is_some() {
                     let measurements_with_cal = self.cal.acc_measurements_with_cal();
-                    plot_window(ctx, "Accel (calibrated)", "m/s²", &measurements_with_cal);
+                    plot_window(
+                        ctx,
+                        &mut self.acc_plot_type,
+                        "Accel (calibrated)",
+                        "m/s²",
+                        &measurements_with_cal,
+                    );
                 }
             }
 
             // mag plot
             if self.show_mag {
-                plot_window(ctx, "Mag", "µT", self.cal.mag_measurements());
+                plot_window(
+                    ctx,
+                    &mut self.mag_plot_type,
+                    "Mag",
+                    "µT",
+                    self.cal.mag_measurements(),
+                );
 
                 if self.cal_data.is_some() {
                     let measurements_with_cal = self.cal.mag_measurements_with_cal();
-                    plot_window(ctx, "Mag (calibrated)", "µT", &measurements_with_cal);
+                    plot_window(
+                        ctx,
+                        &mut self.mag_plot_type,
+                        "Mag (calibrated)",
+                        "µT",
+                        &measurements_with_cal,
+                    );
                 }
             }
         });
@@ -276,36 +332,120 @@ impl eframe::App for MyApp {
 
 fn plot_window(
     ctx: &egui::Context,
+    plot_type: &mut PlotType,
     window_title: &str,
     unit: &str,
-    data: &Vec<nalgebra::Vector3<f64>>,
+    data: &[nalgebra::Vector3<f64>],
 ) {
     egui::Window::new(window_title).show(ctx, |ui| {
-        egui_plot::Plot::new(window_title)
-            .allow_zoom(true)
-            .allow_drag(true)
-            .allow_scroll(false)
-            .allow_boxed_zoom(false)
-            .data_aspect(1.0)
-            .view_aspect(1.0)
-            .x_axis_label(unit)
-            .y_axis_label(unit)
-            .legend(Legend::default())
-            .show(ui, |plot_ui| {
-                plot_ui.points(
-                    egui_plot::Points::new(data.iter().map(|p| [p.x, p.y]).collect::<Vec<_>>())
-                        .name("XY"),
-                );
+        ui.horizontal_top(|ui| {
+            ui.selectable_value(plot_type, PlotType::Scatter, "Scatter");
+            ui.selectable_value(plot_type, PlotType::Histogram(10), "Histogram");
 
-                plot_ui.points(
-                    egui_plot::Points::new(data.iter().map(|p| [p.x, p.z]).collect::<Vec<_>>())
-                        .name("XZ"),
-                );
+            match plot_type {
+                PlotType::Histogram(buckets) => {
+                    ui.label("Buckets:");
+                    ui.add(egui::DragValue::new(buckets));
+                    *buckets = (*buckets).clamp(1, 30);
+                }
+                _ => (),
+            }
+        });
+        ui.separator();
 
-                plot_ui.points(
-                    egui_plot::Points::new(data.iter().map(|p| [p.y, p.z]).collect::<Vec<_>>())
-                        .name("YZ"),
-                );
-            });
+        match plot_type {
+            PlotType::Scatter => egui_plot::Plot::new(window_title)
+                .allow_zoom(true)
+                .allow_drag(true)
+                .allow_scroll(false)
+                .allow_boxed_zoom(false)
+                .data_aspect(1.0)
+                .view_aspect(1.0)
+                .x_axis_label(unit)
+                .y_axis_label(unit)
+                .legend(Legend::default())
+                .show(ui, |plot_ui| {
+                    plot_ui.points(
+                        egui_plot::Points::new(data.iter().map(|p| [p.x, p.y]).collect::<Vec<_>>())
+                            .name("XY"),
+                    );
+
+                    plot_ui.points(
+                        egui_plot::Points::new(data.iter().map(|p| [p.x, p.z]).collect::<Vec<_>>())
+                            .name("XZ"),
+                    );
+
+                    plot_ui.points(
+                        egui_plot::Points::new(data.iter().map(|p| [p.y, p.z]).collect::<Vec<_>>())
+                            .name("YZ"),
+                    );
+                }),
+            PlotType::Histogram(buckets) => egui_plot::Plot::new(window_title)
+                .allow_zoom(true)
+                .allow_drag(true)
+                .allow_scroll(false)
+                .allow_boxed_zoom(true)
+                .x_axis_label(unit)
+                .y_axis_label("count")
+                .legend(Legend::default())
+                .show(ui, |plot_ui| {
+                    // let bucket_width = 0.00005;
+                    let (offsets, widths, hist_data) = histogram_data(data, *buckets);
+
+                    for (i, label) in ["X", "Y", "Z"].iter().enumerate() {
+                        let boxes: Vec<_> = hist_data[0]
+                            .iter()
+                            .enumerate()
+                            .filter(|p| *p.1 > 0)
+                            .map(|p| {
+                                egui_plot::Bar::new(
+                                    p.0 as f64 * widths[i] + offsets[i],
+                                    *p.1 as f64,
+                                )
+                                .vertical()
+                                .width(widths[i])
+                            })
+                            .collect();
+                        plot_ui.bar_chart(egui_plot::BarChart::new(boxes).name(label));
+                    }
+                }),
+        }
     });
+}
+
+fn histogram_data(
+    data: &[nalgebra::Vector3<f64>],
+    bucket_count: usize,
+) -> ([f64; 3], [f64; 3], [Vec<u32>; 3]) {
+    let mut axis_buckets = [const { Vec::new() }; 3];
+
+    let mut min = [core::f64::MAX; 3];
+    let mut max = [core::f64::MIN; 3];
+    let mut bucket_widths = [core::f64::MIN; 3];
+
+    for d in data {
+        for i in 0..3 {
+            min[i] = min[i].min(d[i]);
+            max[i] = max[i].max(d[i]);
+        }
+    }
+
+    for i in 0..3 {
+        bucket_widths[i] = (max[i] - min[i]) / (bucket_count) as f64;
+    }
+
+    for i in 0..3 {
+        let bucket_width_inv = 1.0 / bucket_widths[i];
+
+        let mut buckets = vec![0; bucket_count];
+
+        for d in data.iter().map(|p| p[i]) {
+            let bucket = (((d - min[i]) * bucket_width_inv).round() as usize).min(bucket_count - 1);
+            buckets[bucket] += 1;
+        }
+
+        axis_buckets[i] = buckets;
+    }
+
+    (min, bucket_widths, axis_buckets)
 }
