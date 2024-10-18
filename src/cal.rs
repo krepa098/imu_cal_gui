@@ -2,22 +2,10 @@ const G0: f64 = 9.80665;
 const G0_THR: f64 = G0 * 0.75;
 const F0: f64 = 48.8819; // uT
 
+use nalgebra::{Dyn, Matrix3, Vector3, U10};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
-
-use nalgebra::{Dyn, Matrix3, Vector3, U10};
-
-#[derive(Debug, Clone, Copy)]
-pub struct ImuData {
-    pub lin_acc: Vector3<f64>,
-    pub ang_vel: Vector3<f64>,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct MagData {
-    pub field: Vector3<f64>,
-}
 
 #[derive(Debug, Clone, Copy, serde::Serialize)]
 pub struct CalData {

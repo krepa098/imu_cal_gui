@@ -1,6 +1,7 @@
 use std::sync::mpsc::Receiver;
 
 use crate::cal::*;
+use crate::data_provider::*;
 use eframe::egui::{self, Color32, RichText};
 use eframe::egui::{Style, Visuals};
 use egui::menu;
@@ -75,7 +76,11 @@ impl PartialEq for PlotType {
     }
 }
 
-pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Result {
+pub fn init(
+    data_provider: Box<dyn DataProviderUi>,
+    imu_rx: Receiver<ImuData>,
+    mag_rx: Receiver<MagData>,
+) -> eframe::Result {
     env_logger::init();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([1600.0, 900.0]),
@@ -91,12 +96,13 @@ pub fn init(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> eframe::Res
             };
             cc.egui_ctx.set_style(style);
 
-            Ok(Box::new(MyApp::new(imu_rx, mag_rx)))
+            Ok(Box::new(MyApp::new(data_provider, imu_rx, mag_rx)))
         }),
     )
 }
 
 struct MyApp {
+    data_provider: Box<dyn DataProviderUi>,
     imu_rx: Receiver<ImuData>,
     mag_rx: Receiver<MagData>,
     cal: Cal,
@@ -122,8 +128,13 @@ struct MyApp {
 }
 
 impl MyApp {
-    pub fn new(imu_rx: Receiver<ImuData>, mag_rx: Receiver<MagData>) -> Self {
+    pub fn new(
+        data_provider: Box<dyn DataProviderUi>,
+        imu_rx: Receiver<ImuData>,
+        mag_rx: Receiver<MagData>,
+    ) -> Self {
         Self {
+            data_provider,
             imu_rx,
             mag_rx,
             cal: Cal::new(),
@@ -273,6 +284,10 @@ impl eframe::App for MyApp {
                     }
                 });
             });
+            ui.separator();
+
+            ui.add_space(5.0);
+            self.data_provider.show(ui);
             ui.separator();
 
             ui.add_space(5.0);

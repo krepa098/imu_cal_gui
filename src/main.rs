@@ -2,23 +2,29 @@
 
 use std::time::Duration;
 
+use serial_data_provider::SerialDataProvider;
+
 mod cal;
+mod data_provider;
 mod ros_node;
+mod serial_data_provider;
 mod ui;
 
 fn main() {
     let rt = tokio::runtime::Runtime::new().expect("Unable to create Runtime");
     let _enter = rt.enter();
 
-    let (_rn, mut node, imu_rx, mag_rx) = ros_node::Node::new();
+    // let (_rn, mut node, imu_rx, mag_rx) = ros_node::Node::new();
 
-    std::thread::spawn(move || {
-        rt.block_on(async {
-            loop {
-                node.spin_once(Duration::from_millis(1));
-            }
-        })
-    });
+    // std::thread::spawn(move || {
+    //     rt.block_on(async {
+    //         loop {
+    //             node.spin_once(Duration::from_millis(1));
+    //         }
+    //     })
+    // });
 
-    ui::init(imu_rx, mag_rx).unwrap();
+    let (provider, imu_rx, mag_rx) = SerialDataProvider::new();
+
+    ui::init(provider, imu_rx, mag_rx).unwrap();
 }

@@ -1,6 +1,6 @@
 use std::sync::mpsc::Receiver;
 
-use crate::cal::{ImuData, MagData};
+use crate::data_provider::{ImuData, MagData};
 use futures::{future, StreamExt};
 use r2r::sensor_msgs;
 use r2r::QosProfile;
