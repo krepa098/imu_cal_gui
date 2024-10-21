@@ -1,42 +1,63 @@
 name: windows build
 
 on:
-    push:
-        branches: [ master ]
-    pull_request:
-        branches: [ master ]
-    release:
-        types: [ published ]
+  push:
+    branches: [cicd]
+    tags:
+      - "*"
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
 
 jobs:
-    build:
-        runs-on: windows-latest
+  build:
+    runs-on: windows-2019
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-            # setup fortran compiler
-            - uses: fortran-lang/setup-fortran@v1
-              id: setup-fortran
-              with:
-                compiler: gcc
-                version: 13
+      - name: set gnu toolchain
+        run: |
+          rustup default stable-x86_64-pc-windows-gnu
+          rustup override set stable-x86_64-pc-windows-gnu
 
-            - name: Check Compilers and Versions
-              run: |
-                echo $env:FC
-                cmake --version
-                cargo --version
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
 
-            # build exe
-            - name: build
-              run: cargo build --release --no-default-features
-              working-directory: ${{ github.workspace }}
-              env:
-                FC: ${{ steps.setup-fortran.outputs.fc }}
-            
-            # artifact
-            - uses: actions/upload-artifact@v4
-              with:
-                name: imu-calibration-gui-serialport.exe
-                path: ${{ github.workspace }}/target/release/imu_cal_gui.exe
+      # note: the path is changed to include msys64 binaries (e.g., make)
+      - name: toolchain check
+        run: |
+          $env:PATH = "C:\msys64\usr\bin;$env:PATH"
+          gcc --version
+          gfortran --version
+          cmake --version
+          make --version
+          rustup default
+          rustup override list
+
+      # build exe
+      - name: build
+        run: |
+          $env:PATH = "C:\msys64\usr\bin;$env:PATH"
+          cargo build --release --no-default-features
+        env:
+          CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG: true
+
+      - name: bundle
+        shell: bash
+        run: |
+          mkdir bundle
+          cp target/release/imu_cal_gui.exe ./bundle
+          cp /c/msys64/mingw64/bin/libquadmath-0.dll ./bundle
+          cp /c/msys64/mingw64/bin/libgcc_s_seh-1.dll ./bundle
+          cp /c/msys64/mingw64/bin/libgomp-1.dll ./bundle
+          cp /c/msys64/mingw64/bin/libwinpthread-1.dll ./bundle
+          find target/release -name 'libopenblas.dll' -exec cp "{}" ./bundle  \;
+
+      # artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: imu-cal-gui-serialport-x86_64-windows-gnu
+          path: |
+            ${{ github.workspace }}/bundle

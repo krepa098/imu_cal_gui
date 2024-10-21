@@ -4,9 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+nalgebra-lapack = { version = "0.25.0", default-features = false, features = [
+    "openblas",
+] }
 tokio = { version = "1.40.0", features = ["full"] }
 nalgebra = { version = "0.33.0", features = ["serde-serialize"] }
-nalgebra-lapack = "0.25.0"
 futures = "0.3.31"
 r2r = { version = "0.9", optional = true }
 eframe = "0.29.1"
@@ -22,10 +24,14 @@ bytes = "1.7.2"
 stream-cancel = "0.8.2"
 scanf = "1.2.1"
 
+# [target.'cfg(windows)'.dependencies.openblas-src]
+# version = "*"
+# features = ["cblas", "lapacke", "system"]
+
 [features]
 ros = ["dep:r2r"]
 default = ["ros"]
 
-[profile.release]
-strip = true
-lto = true
+# [profile.release]
+# strip = true
+# lto = true
