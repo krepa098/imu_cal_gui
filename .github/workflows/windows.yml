@@ -60,7 +60,7 @@ jobs:
         if: "${{ github.event.inputs.build_type == 'debug' }}"
         run: |
           $env:PATH = "C:\msys64\usr\bin;$env:PATH"
-          cargo build --release --no-default-features
+          cargo build --no-default-features
           mkdir bundle
           cp target/debug/imu_cal_gui.exe ./bundle
 
