@@ -305,7 +305,7 @@ impl eframe::App for MyApp {
                 }
             });
 
-            egui::Grid::new("data_sizrce_grid").show(ui, |ui| {
+            egui::Grid::new("data_source_grid").show(ui, |ui| {
                 ui.toggle_value(&mut self.collect_gyro, "Gyro");
                 ui.label(self.gyro_rate.to_string());
                 ui.end_row();

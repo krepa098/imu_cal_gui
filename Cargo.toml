@@ -24,10 +24,6 @@ bytes = "1.7.2"
 stream-cancel = "0.8.2"
 scanf = "1.2.1"
 
-# [target.'cfg(windows)'.dependencies.openblas-src]
-# version = "*"
-# features = ["cblas", "lapacke", "system"]
-
 [features]
 ros = ["dep:r2r"]
 default = ["ros"]
