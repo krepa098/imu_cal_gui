@@ -6,7 +6,7 @@ use futures::prelude::*;
 use nalgebra::vector;
 use std::sync::mpsc::{Receiver, Sender};
 use stream_cancel::StreamExt;
-use tokio_serial::SerialPortBuilderExt;
+use tokio_serial::{SerialPort, SerialPortBuilderExt};
 use tokio_util::codec::Decoder;
 
 const BAUDRATES: [u32; 9] = [
@@ -78,14 +78,14 @@ impl DataProviderUi for SerialDataProvider {
                 }
             } else {
                 if ui.button("Open").clicked() {
-                    let port = tokio_serial::new(&serial_port_info.port_name, self.baud_rate)
+                    let mut port = tokio_serial::new(&serial_port_info.port_name, self.baud_rate)
                         .data_bits(tokio_serial::DataBits::Eight)
                         .flow_control(tokio_serial::FlowControl::None)
                         .parity(tokio_serial::Parity::None)
                         .stop_bits(tokio_serial::StopBits::One)
                         .open_native_async()
                         .unwrap();
-
+                    port.write_data_terminal_ready(true).unwrap(); // dtr: required for Arduinos to send data
                     println!("Open serial port: {}", serial_port_info.port_name);
 
                     let (trigger, tripwire) = stream_cancel::Tripwire::new();
