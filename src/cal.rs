@@ -220,15 +220,19 @@ impl Cal {
             let sz_p = z_p.iter().sum::<f64>() / z_p.len() as f64;
             let sz_m = z_m.iter().sum::<f64>() / z_m.len() as f64;
 
-            Vector3::new(sx_p + sx_m, sy_p + sy_m, sz_p + sz_m)
+            Vector3::new(
+                (sx_p + sx_m) * 0.5,
+                (sy_p + sy_m) * 0.5,
+                (sz_p + sz_m) * 0.5,
+            )
         };
         let acc_scale = {
             let range_x: f64 = (x_p.iter().sum::<f64>() / x_p.len() as f64)
                 - (x_m.iter().sum::<f64>() / x_m.len() as f64);
             let range_y: f64 = (y_p.iter().sum::<f64>() / y_p.len() as f64)
-                - (x_m.iter().sum::<f64>() / x_m.len() as f64);
+                - (y_m.iter().sum::<f64>() / y_m.len() as f64);
             let range_z: f64 = (z_p.iter().sum::<f64>() / z_p.len() as f64)
-                - (x_m.iter().sum::<f64>() / x_m.len() as f64);
+                - (z_m.iter().sum::<f64>() / z_m.len() as f64);
 
             let scale_x = 2.0 * G0 / range_x;
             let scale_y = 2.0 * G0 / range_y;
