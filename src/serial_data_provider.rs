@@ -44,7 +44,10 @@ impl DataProviderUi for SerialDataProvider {
     fn show(&mut self, ui: &mut eframe::egui::Ui) {
         ui.heading("Serial");
         if self.trigger.is_some() {
-            ui.label(self.serial_port_info.as_ref().map_or("", |p| &p.port_name));
+            ui.label(format!(
+                "'{}' 8-N-1",
+                self.serial_port_info.as_ref().map_or("", |p| &p.port_name)
+            ));
         } else {
             egui::ComboBox::new("ports", "Port")
                 .selected_text(self.serial_port_info.as_ref().map_or("", |p| &p.port_name))
@@ -76,6 +79,10 @@ impl DataProviderUi for SerialDataProvider {
             } else {
                 if ui.button("Open").clicked() {
                     let port = tokio_serial::new(&serial_port_info.port_name, self.baud_rate)
+                        .data_bits(tokio_serial::DataBits::Eight)
+                        .flow_control(tokio_serial::FlowControl::None)
+                        .parity(tokio_serial::Parity::None)
+                        .stop_bits(tokio_serial::StopBits::One)
                         .open_native_async()
                         .unwrap();
 
