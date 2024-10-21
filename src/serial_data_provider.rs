@@ -53,6 +53,11 @@ impl DataProviderUi for SerialDataProvider {
                 .selected_text(self.serial_port_info.as_ref().map_or("", |p| &p.port_name))
                 .show_ui(ui, |ui| {
                     for port in tokio_serial::available_ports().unwrap() {
+                        // remove /dev/ttySx.
+                        if port.port_name.contains("/dev/ttyS") {
+                            continue;
+                        }
+
                         let port_name = port.port_name.clone();
                         ui.selectable_value(
                             &mut self.serial_port_info,
