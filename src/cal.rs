@@ -344,11 +344,11 @@ impl Cal {
         let s_22_inv = s_22.try_inverse().unwrap();
 
         let e = c_inv * (s_11 - s_12 * (s_22_inv * s_21));
+        let s = nalgebra::Schur::new(e);
+        let (q, _) = s.unpack();
 
-        let e_eigen = nalgebra_lapack::Eigen::new(e, true, true).unwrap();
-
-        let e_v = e_eigen.eigenvectors.unwrap();
-        let e_w = e_eigen.eigenvalues_re;
+        let e_w = s.eigenvalues().unwrap();
+        let e_v = q.column(0);
 
         // println!("E {}", e_v);
 
