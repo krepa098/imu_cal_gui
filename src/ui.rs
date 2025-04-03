@@ -249,12 +249,21 @@ impl eframe::App for MyApp {
                         ui.label(format!("{:.4e}", cal_data.hard_iron_bias.y));
                         ui.label(format!("{:.4e}", cal_data.hard_iron_bias.z));
                     });
-                ui.heading("mag cal quality (closer to zero is better)");
+                ui.separator();
+                ui.heading("mag calibration quality");
                 egui::Grid::new("mag_quality").striped(true).show(ui, |ui| {
-                    ui.label(format!(
-                        "Gaps: {:.1}",
-                        cal_data.mag_quality.surface_gap_error()
-                    ));
+                    let color = match cal_data.mag_quality.surface_gap_error() {
+                        0.0..20.0 => Color32::GREEN,
+                        20.0..30.0 => Color32::YELLOW,
+                        _ => Color32::RED,
+                    };
+                    ui.label(
+                        RichText::new(format!(
+                            "Coverage: {:.1}%",
+                            100.0 - cal_data.mag_quality.surface_gap_error()
+                        ))
+                        .color(color),
+                    );
                     ui.end_row();
                     ui.label(format!(
                         "Wobble: {:.1}",
