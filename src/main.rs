@@ -4,6 +4,7 @@ use serial_data_provider::SerialDataProvider;
 
 mod cal;
 mod data_provider;
+mod quality;
 #[cfg(feature = "ros")]
 mod ros_data_provider;
 mod serial_data_provider;

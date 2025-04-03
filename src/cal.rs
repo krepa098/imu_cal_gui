@@ -7,13 +7,16 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, Copy, serde::Serialize)]
+use crate::quality::Quality;
+
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct CalData {
     pub gyro_offset: Vector3<f64>,
     pub acc_offset: Vector3<f64>,
     pub acc_scale: Vector3<f64>,
     pub soft_iron_transf: nalgebra::Matrix3<f64>,
     pub hard_iron_bias: Vector3<f64>,
+    pub mag_quality: Quality,
 }
 
 impl CalData {
@@ -115,7 +118,7 @@ impl Cal {
     }
 
     pub fn gyro_measurements_with_cal(&self) -> Vec<Vector3<f64>> {
-        if let Some(cal_data) = self.cal_data {
+        if let Some(cal_data) = self.cal_data.as_ref() {
             self.gyro_points
                 .iter()
                 .map(|p| *p - cal_data.gyro_offset)
@@ -126,7 +129,7 @@ impl Cal {
     }
 
     pub fn acc_measurements_with_cal(&self) -> Vec<Vector3<f64>> {
-        if let Some(cal_data) = self.cal_data {
+        if let Some(cal_data) = self.cal_data.as_ref() {
             self.acc_points
                 .iter()
                 .map(|p| (*p - cal_data.acc_offset).component_mul(&cal_data.acc_scale))
@@ -137,7 +140,7 @@ impl Cal {
     }
 
     pub fn mag_measurements_with_cal(&self) -> Vec<Vector3<f64>> {
-        if let Some(cal_data) = self.cal_data {
+        if let Some(cal_data) = self.cal_data.as_ref() {
             self.mag_points
                 .iter()
                 .map(|p| cal_data.apply_mag_cal(p))
@@ -252,14 +255,21 @@ impl Cal {
             (Matrix3::identity(), Vector3::zeros())
         };
 
+        let mut mag_quality = Quality::default();
+        mag_quality.reset();
+        for p in &self.mag_points {
+            mag_quality.update(a1 * (*p - b));
+        }
+
         let cal_data = CalData {
             gyro_offset,
             acc_offset,
             acc_scale,
             soft_iron_transf: a1,
             hard_iron_bias: b,
+            mag_quality,
         };
-        self.cal_data = Some(cal_data);
+        self.cal_data = Some(cal_data.clone());
 
         cal_data
     }

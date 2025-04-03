@@ -249,6 +249,23 @@ impl eframe::App for MyApp {
                         ui.label(format!("{:.4e}", cal_data.hard_iron_bias.y));
                         ui.label(format!("{:.4e}", cal_data.hard_iron_bias.z));
                     });
+                ui.heading("mag cal quality (closer to zero is better)");
+                egui::Grid::new("mag_quality").striped(true).show(ui, |ui| {
+                    ui.label(format!(
+                        "Gaps: {:.1}",
+                        cal_data.mag_quality.surface_gap_error()
+                    ));
+                    ui.end_row();
+                    ui.label(format!(
+                        "Wobble: {:.1}",
+                        cal_data.mag_quality.wobble_error()
+                    ));
+                    ui.end_row();
+                    ui.label(format!(
+                        "Magnitude variance: {:.1}",
+                        cal_data.mag_quality.magnitude_variance_error()
+                    ));
+                });
             });
             modal_cal_data.buttons(ui, |ui| {
                 if modal_cal_data.caution_button(ui, "close").clicked() {
@@ -372,7 +389,7 @@ impl eframe::App for MyApp {
                 self.cal_data = Some(self.cal.calibrate());
                 modal_cal_data.open();
             }
-            if let Some(cal_data) = self.cal_data {
+            if let Some(cal_data) = self.cal_data.as_ref() {
                 if ui.button("🗐 copy as json").clicked() {
                     ui.output_mut(|w| w.copied_text = cal_data.as_json_string())
                 }
