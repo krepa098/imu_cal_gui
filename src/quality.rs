@@ -8,6 +8,8 @@ use serde::ser::SerializeStruct;
 use serde::Serialize;
 use std::f64::consts::{FRAC_PI_2, PI, TAU};
 
+const REGION_COUNT: usize = 100;
+
 fn sphere_region(p: Vector3<f64>) -> i32 {
     let longitude = p.y.atan2(p.x) + PI;
     let latitude = FRAC_PI_2 - ((p.x * p.x + p.y * p.y).sqrt()).atan2(p.z);
@@ -53,8 +55,6 @@ fn sphere_region(p: Vector3<f64>) -> i32 {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Quality {
     #[serde(skip_serializing)]
-    count: usize,
-    #[serde(skip_serializing)]
     sphere_dist: Vec<i32>,
     #[serde(skip_serializing)]
     sphere_data: Vec<Vector3<f64>>,
@@ -79,11 +79,10 @@ pub struct Quality {
 impl Default for Quality {
     fn default() -> Self {
         Self {
-            sphere_dist: vec![0; 100],
-            sphere_data: vec![Vector3::zeros(); 100],
-            sphere_ideal: vec![Vector3::zeros(); 100],
-            magnitude: vec![0.0; 650],
-            count: 0,
+            sphere_dist: vec![0; REGION_COUNT],
+            sphere_data: vec![Vector3::zeros(); REGION_COUNT],
+            sphere_ideal: vec![Vector3::zeros(); REGION_COUNT],
+            magnitude: vec![],
             sphereideal_initialized: false,
             quality_gaps_computed: false,
             quality_variance_computed: false,
@@ -108,7 +107,7 @@ impl Default for Quality {
 
 impl Quality {
     pub fn reset(&mut self) {
-        self.count = 0;
+        self.magnitude.clear();
         self.sphere_dist.fill_with(|| 0);
         self.sphere_data.fill_with(|| Vector3::zeros());
 
@@ -154,22 +153,20 @@ impl Quality {
     }
 
     pub fn update(&mut self, p: Vector3<f64>) {
-        if self.count < self.magnitude.len() {
-            self.magnitude[self.count] = (p.x * p.x + p.y * p.y + p.z * p.z).sqrt();
-            let region = sphere_region(p) as usize;
-            self.sphere_dist[region] += 1;
-            self.sphere_data[region].x += p.x;
-            self.sphere_data[region].y += p.y;
-            self.sphere_data[region].z += p.z;
-            self.count += 1;
-            self.quality_gaps_computed = false;
-            self.quality_variance_computed = false;
-            self.quality_wobble_computed = false;
+        self.magnitude
+            .push((p.x * p.x + p.y * p.y + p.z * p.z).sqrt());
+        let region = sphere_region(p) as usize;
+        self.sphere_dist[region] += 1;
+        self.sphere_data[region].x += p.x;
+        self.sphere_data[region].y += p.y;
+        self.sphere_data[region].z += p.z;
+        self.quality_gaps_computed = false;
+        self.quality_variance_computed = false;
+        self.quality_wobble_computed = false;
 
-            self.calc_magnitude_variance_error();
-            self.calc_surface_gap_error();
-            self.calc_wobble_error();
-        }
+        self.calc_magnitude_variance_error();
+        self.calc_surface_gap_error();
+        self.calc_wobble_error();
     }
 
     pub fn calc_surface_gap_error(&mut self) -> f64 {
@@ -179,7 +176,7 @@ impl Quality {
             return self.quality_gaps_buffer;
         }
 
-        for i in 0..self.sphere_dist.len() {
+        for i in 0..REGION_COUNT {
             let num = self.sphere_dist[i];
             if num == 0 {
                 error += 1.0;
@@ -200,16 +197,16 @@ impl Quality {
         }
 
         let mut sum = 0.0;
-        for i in 0..self.count {
+        for i in 0..self.magnitude.len() {
             sum += self.magnitude[i];
         }
-        let mean = sum / self.count as f64;
+        let mean = sum / self.magnitude.len() as f64;
         let mut variance = 0.0;
-        for i in 0..self.count {
+        for i in 0..self.magnitude.len() {
             let diff = self.magnitude[i] - mean;
             variance += diff * diff;
         }
-        variance /= self.count as f64;
+        variance /= self.magnitude.len() as f64;
         self.quality_variance_buffer = variance.sqrt() / mean * 100.0;
         self.quality_variance_computed = true;
         return self.quality_variance_buffer;
@@ -225,12 +222,12 @@ impl Quality {
             return self.quality_wobble_buffer;
         }
         let mut sum = 0.0;
-        for i in 0..self.count {
+        for i in 0..self.magnitude.len() {
             sum += self.magnitude[i];
         }
-        let radius = sum / self.count as f64;
+        let radius = sum / self.magnitude.len() as f64;
 
-        for i in 0..self.sphere_dist.len() {
+        for i in 0..REGION_COUNT {
             if self.sphere_dist[i] > 0 {
                 let x = self.sphere_data[i].x / self.sphere_dist[i] as f64;
                 let y = self.sphere_data[i].y / self.sphere_dist[i] as f64;
